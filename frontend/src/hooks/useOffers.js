@@ -50,8 +50,8 @@ export function useOffers() {
           ? parseFloat((parseFloat(offer.askAmount) / parseFloat(offer.sellAmount)).toFixed(8))
           : 0,
         status: 'active',
-        expires_at: offer.expiresAt,
-        created_at: new Date().toISOString(),
+        expires_at: offer.expiresAt ? parseFloat(offer.expiresAt) : null,
+        created_at: offer.createdAt ? parseFloat(offer.createdAt) : Math.floor(Date.now() / 1000),
       }))
 
       setOffers(transformedOffers)

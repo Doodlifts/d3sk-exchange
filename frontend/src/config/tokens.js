@@ -464,16 +464,16 @@ export async function fetchAllTokenPrices() {
   } catch (err) {
     console.warn('Could not fetch token prices:', err);
     return {
-      FLOW: { usd: 0.75, change24h: 0 },
+      FLOW: { usd: 0.05, change24h: 0 },
       PYUSD: { usd: 1.0, change24h: 0 },
       'USDC.e': { usd: 1.0, change24h: 0 },
       USDC: { usd: 1.0, change24h: 0 },
       USDF: { usd: 1.0, change24h: 0 },
       stgUSDT: { usd: 1.0, change24h: 0 },
-      stFLOW: { usd: 0.79, change24h: 0 },
-      stgWETH: { usd: 3200, change24h: 0 },
-      WBTC: { usd: 95000, change24h: 0 },
-      cbBTC: { usd: 95000, change24h: 0 },
+      stFLOW: { usd: 0.053, change24h: 0 },
+      stgWETH: { usd: 1980, change24h: 0 },
+      WBTC: { usd: 68000, change24h: 0 },
+      cbBTC: { usd: 68000, change24h: 0 },
     };
   }
 }

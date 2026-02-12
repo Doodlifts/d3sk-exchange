@@ -172,8 +172,8 @@ export default function OrderBook() {
           bVal = parseFloat(b.sell_amount) * (usdPrices[getTokenName(b.sell_type)] || 0)
           break
         case 'created_at':
-          aVal = new Date(a.created_at).getTime()
-          bVal = new Date(b.created_at).getTime()
+          aVal = a.created_at || 0
+          bVal = b.created_at || 0
           break
         default:
           return 0
