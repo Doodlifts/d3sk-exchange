@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { fcl, config } from '../config/fcl'
@@ -219,20 +219,18 @@ export default function FillOffer() {
   const receiveUsdValue = (parseFloat(offer.sell_amount) * sellUsdPrice).toFixed(2)
 
   // Generate the certificate SVG (matches the on-chain NFT exactly)
-  const certificateSvg = useMemo(() => {
-    if (!offer) return null
-    return generateCertificateSVG({
-      id: offer.id,
-      sellTokenName,
-      askTokenName,
-      sellAmount: offer.sell_amount,
-      askAmount: offer.ask_amount,
-      maker: makerAddr,
-      createdAt: offer.created_at,
-      expiresAt: offer.expires_at,
-      status: offer.status || 'active',
-    })
-  }, [offer, sellTokenName, askTokenName, makerAddr])
+  // NOTE: Not using useMemo here because hooks cannot be placed after early returns
+  const certificateSvg = generateCertificateSVG({
+    id: offer.id,
+    sellTokenName,
+    askTokenName,
+    sellAmount: offer.sell_amount,
+    askAmount: offer.ask_amount,
+    maker: makerAddr,
+    createdAt: offer.created_at,
+    expiresAt: offer.expires_at,
+    status: offer.status || 'active',
+  })
 
   return (
     <div className="min-h-screen bg-d3sk-bg px-4 py-8">
@@ -364,7 +362,7 @@ export default function FillOffer() {
         </div>
 
         {/* Action Area — placed above NFT preview for easy access */}
-        <div className="pixel-window border-3 border-d3sk-accent shadow-pixel">
+        <div className="pixel-window border-3 border-d3sk-accent shadow-pixel mb-6">
           <div className="pixel-window-title bg-d3sk-accent text-d3sk-bg">
             <span className="text-pixel-sm font-pixel">EXECUTE TRADE</span>
           </div>
