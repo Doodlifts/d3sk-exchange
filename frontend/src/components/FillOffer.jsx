@@ -25,6 +25,8 @@ export default function FillOffer() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [usdPrices, setUsdPrices] = useState({})
   const [feeRate, setFeeRate] = useState(null) // null = loading
+  const [nftSvg, setNftSvg] = useState(null)
+  const [svgLoading, setSvgLoading] = useState(false)
 
   useEffect(() => {
     if (offers.length > 0) {
@@ -44,6 +46,59 @@ export default function FillOffer() {
     }
     fetchPrices()
   }, [])
+
+  // Fetch on-chain SVG certificate from the NFT
+  useEffect(() => {
+    if (!offer) return
+    const makerAddr = offer.maker || offer.maker_address
+    if (!makerAddr) return
+
+    async function fetchNftSvg() {
+      setSvgLoading(true)
+      try {
+        const svg = await fcl.query({
+          cadence: `
+            import D3SKOfferNFT from ${config.d3skOfferNFT}
+
+            access(all) fun main(addr: Address, nftID: UInt64): String? {
+              let acct = getAccount(addr)
+              let cap = acct.capabilities.get<&{D3SKOfferNFT.OfferCollectionPublic}>(
+                D3SKOfferNFT.CollectionPublicPath
+              )
+              if !cap.check() { return nil }
+              let col = cap.borrow()!
+              let ids = col.getOfferIDs()
+              // Check if this NFT exists in the collection
+              var found = false
+              for id in ids {
+                if id == nftID { found = true; break }
+              }
+              if !found { return nil }
+              // Borrow the NFT and resolve the CertificateSVG view
+              let nftRef = col.borrowNFT(nftID)
+              if nftRef == nil { return nil }
+              let view = nftRef!.resolveView(Type<D3SKOfferNFT.CertificateSVG>())
+              if view == nil { return nil }
+              let cert = view! as! D3SKOfferNFT.CertificateSVG
+              return cert.svg
+            }
+          `,
+          args: (arg, t) => [
+            arg(makerAddr, t.Address),
+            arg(parseInt(offerId).toString(), t.UInt64),
+          ],
+        })
+        if (svg) {
+          setNftSvg(svg)
+        }
+      } catch (err) {
+        console.warn('Could not fetch NFT SVG:', err)
+      } finally {
+        setSvgLoading(false)
+      }
+    }
+    fetchNftSvg()
+  }, [offer, offerId])
 
   // Fetch protocol fee rate
   useEffect(() => {
@@ -289,6 +344,37 @@ export default function FillOffer() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* On-Chain SVG NFT Certificate */}
+        <div className="pixel-window border-3 border-d3sk-yellow shadow-pixel mb-6">
+          <div className="pixel-window-title bg-d3sk-yellow text-d3sk-bg">
+            <span className="text-pixel-sm font-pixel">FULLY ON-CHAIN SVG NFT</span>
+          </div>
+          <div className="pixel-window-body bg-d3sk-bg p-4">
+            {svgLoading ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 border-2 border-d3sk-yellow border-t-d3sk-green rounded-full animate-spin mx-auto mb-3"></div>
+                <p className="font-retro text-retro-sm text-d3sk-muted">LOADING ON-CHAIN SVG...</p>
+              </div>
+            ) : nftSvg ? (
+              <div className="flex flex-col items-center">
+                <div
+                  className="w-full max-w-xs mx-auto border-2 border-d3sk-border shadow-pixel"
+                  dangerouslySetInnerHTML={{ __html: nftSvg }}
+                />
+                <p className="font-retro text-retro-sm text-d3sk-muted mt-3 text-center">
+                  100% ON-CHAIN — NO IPFS, NO ARWEAVE, NO OFF-CHAIN STORAGE
+                </p>
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <p className="font-retro text-retro-sm text-d3sk-muted">
+                  SVG CERTIFICATE UNAVAILABLE
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
