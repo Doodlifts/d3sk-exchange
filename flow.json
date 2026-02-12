@@ -23,6 +23,9 @@
     "D3SKRegistry": {
       "source": "./contracts/D3SKRegistry.cdc"
     },
+    "D3SKFillProxy": {
+      "source": "./contracts/D3SKFillProxy.cdc"
+    },
     "FungibleToken": {
       "aliases": {
         "testnet": "0x9a0766d93b6608b7",
@@ -62,7 +65,7 @@
   },
   "deployments": {
     "mainnet": {
-      "mainnet-deployer": ["D3SKOfferNFT", "D3SKRegistry"]
+      "mainnet-deployer": ["D3SKFillProxy"]
     }
   }
 }

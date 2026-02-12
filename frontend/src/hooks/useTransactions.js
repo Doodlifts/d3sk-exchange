@@ -46,6 +46,7 @@ export function useTransactions() {
           import NonFungibleToken from ${config.nonFungibleToken}
           import ${sellTokenConfig.contractName} from ${sellTokenConfig.contractAddress}
           import D3SKOfferNFT from ${config.d3skOfferNFT}
+          import D3SKFillProxy from ${config.d3skFillProxy}
 
           transaction(sellAmount: UFix64, askTokenTypeIdentifier: String, askAmount: UFix64, duration: UFix64) {
               prepare(signer: auth(BorrowValue, SaveValue, LoadValue, IssueStorageCapabilityController, PublishCapability, UnpublishCapability) &Account) {
@@ -60,12 +61,16 @@ export function useTransactions() {
                       signer.storage.save(<- D3SKOfferNFT.createEmptyCollection(nftType: Type<@D3SKOfferNFT.NFT>()), to: D3SKOfferNFT.CollectionStoragePath)
                   }
 
-                  // Publish auth(Fill) capability so takers can call access(Fill) fillOffer
-                  // Always unpublish first to clear any stale/wrong-typed capability
-                  if !signer.capabilities.get<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionPublicPath).check() {
-                      signer.capabilities.unpublish(D3SKOfferNFT.CollectionPublicPath)
-                      let cap = signer.capabilities.storage.issue<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionStoragePath)
-                      signer.capabilities.publish(cap, at: D3SKOfferNFT.CollectionPublicPath)
+                  // Setup FillProxy — stores auth(Fill) capability privately inside a resource,
+                  // then publishes non-auth &Proxy so takers can call fillOffer without auth
+                  if signer.storage.borrow<&D3SKFillProxy.Proxy>(from: D3SKFillProxy.ProxyStoragePath) == nil {
+                      let fillCap = signer.capabilities.storage.issue<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionStoragePath)
+                      let proxy <- D3SKFillProxy.createProxy(cap: fillCap)
+                      signer.storage.save(<-proxy, to: D3SKFillProxy.ProxyStoragePath)
+
+                      signer.capabilities.unpublish(D3SKFillProxy.ProxyPublicPath)
+                      let proxyCap = signer.capabilities.storage.issue<&D3SKFillProxy.Proxy>(D3SKFillProxy.ProxyStoragePath)
+                      signer.capabilities.publish(proxyCap, at: D3SKFillProxy.ProxyPublicPath)
                   }
 
                   // Withdraw sell tokens
@@ -141,14 +146,15 @@ export function useTransactions() {
           import FungibleToken from ${config.fungibleToken}
           import ${paymentTokenConfig.contractName} from ${paymentTokenConfig.contractAddress}
           import D3SKOfferNFT from ${config.d3skOfferNFT}
+          import D3SKFillProxy from ${config.d3skFillProxy}
 
           transaction(holderAddress: Address, offerID: UInt64, paymentAmount: UFix64) {
               prepare(signer: auth(BorrowValue) &Account) {
-                  // Borrow the holder's collection with Fill entitlement (published by createOffer)
-                  let collectionRef = getAccount(holderAddress)
-                      .capabilities.borrow<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(
-                          D3SKOfferNFT.CollectionPublicPath
-                      ) ?? panic("Could not borrow holder's offer collection")
+                  // Borrow the holder's FillProxy (non-auth — proxy wraps auth capability internally)
+                  let proxyRef = getAccount(holderAddress)
+                      .capabilities.borrow<&D3SKFillProxy.Proxy>(
+                          D3SKFillProxy.ProxyPublicPath
+                      ) ?? panic("Could not borrow holder's fill proxy")
 
                   // Calculate total payment including protocol fee
                   let feeRate = D3SKOfferNFT.feeRate
@@ -160,9 +166,9 @@ export function useTransactions() {
                   ) ?? panic("Could not borrow payment vault")
                   let payment <- paymentVaultRef.withdraw(amount: totalPayment)
 
-                  // Fill the offer — payment goes to holderAddress, sell tokens returned to taker
+                  // Fill via proxy — payment goes to holderAddress, sell tokens returned to taker
                   let askReceiverPath = ${paymentTokenConfig.receiverPath}
-                  let receivedTokens <- collectionRef.fillOffer(
+                  let receivedTokens <- proxyRef.fillOffer(
                       id: offerID,
                       payment: <-payment,
                       holderAddress: holderAddress,

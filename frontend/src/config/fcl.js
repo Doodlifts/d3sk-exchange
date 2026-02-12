@@ -12,6 +12,7 @@ const networkConfig = {
     nonFungibleToken: "0x631e88ae7f1d7c20",
     d3skOfferNFT: import.meta.env.VITE_D3SK_OFFER_ADDRESS || "0x_DEPLOY_ADDRESS",
     d3skRegistry: import.meta.env.VITE_D3SK_REGISTRY_ADDRESS || "0x_DEPLOY_ADDRESS",
+    d3skFillProxy: import.meta.env.VITE_D3SK_FILL_PROXY_ADDRESS || "0x_DEPLOY_ADDRESS",
     scheduler: "0xe467b9dd11fa00df",
   },
   mainnet: {
@@ -22,6 +23,7 @@ const networkConfig = {
     nonFungibleToken: "0x1d7e57aa55817448",
     d3skOfferNFT: import.meta.env.VITE_D3SK_OFFER_ADDRESS || "0x_DEPLOY_ADDRESS",
     d3skRegistry: import.meta.env.VITE_D3SK_REGISTRY_ADDRESS || "0x_DEPLOY_ADDRESS",
+    d3skFillProxy: import.meta.env.VITE_D3SK_FILL_PROXY_ADDRESS || "0x_DEPLOY_ADDRESS",
     scheduler: "0xe467b9dd11fa00df",
   }
 }
