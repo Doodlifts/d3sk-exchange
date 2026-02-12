@@ -227,9 +227,9 @@ export default function CreateOffer() {
                 <p className="text-retro-sm text-d3sk-muted font-retro">
                   {TOKEN_REGISTRY[sellToken]?.label || sellToken}
                 </p>
-                {priceMetrics && sellAmount && (
+                {parseFloat(sellAmount) > 0 && usdPrices[TOKEN_REGISTRY[sellToken]?.label] && (
                   <p className="text-retro-sm text-d3sk-yellow font-retro">
-                    ${priceMetrics.sellUsd}
+                    ${(parseFloat(sellAmount) * usdPrices[TOKEN_REGISTRY[sellToken]?.label]).toFixed(2)}
                   </p>
                 )}
               </div>
@@ -278,9 +278,9 @@ export default function CreateOffer() {
                 <p className="text-retro-sm text-d3sk-muted font-retro">
                   {TOKEN_REGISTRY[askToken]?.label || askToken}
                 </p>
-                {priceMetrics && askAmount && (
+                {parseFloat(askAmount) > 0 && usdPrices[TOKEN_REGISTRY[askToken]?.label] && (
                   <p className="text-retro-sm text-d3sk-yellow font-retro">
-                    ${priceMetrics.askUsd}
+                    ${(parseFloat(askAmount) * usdPrices[TOKEN_REGISTRY[askToken]?.label]).toFixed(2)}
                   </p>
                 )}
               </div>
