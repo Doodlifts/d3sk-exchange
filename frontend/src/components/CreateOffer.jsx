@@ -141,28 +141,22 @@ export default function CreateOffer() {
     resetTx();
   };
 
-  // Helper function to get token icon and label
-  const getTokenDisplay = (tokenKey) => {
-    const token = TOKEN_REGISTRY[tokenKey];
-    return token ? `${token.icon} ${token.label}` : tokenKey;
-  };
-
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-d3sk-bg p-4 sm:p-6 flex items-center justify-center">
         <div className="max-w-2xl w-full">
           <div className="pixel-window border-3 border-d3sk-border shadow-pixel text-center">
             <div className="pixel-window-title bg-d3sk-red text-d3sk-bg">
-              <span className="text-pixel-xs font-pixel">NOT CONNECTED</span>
+              <span className="text-pixel-sm font-pixel">NOT CONNECTED</span>
             </div>
             <div className="pixel-window-body bg-d3sk-bg p-6">
-              <h1 className="pixel-heading text-d3sk-green mb-3 crt-glow" style={{ fontSize: '20px' }}>CREATE OFFER</h1>
-              <p className="terminal-text text-d3sk-text mb-6" style={{ fontSize: '12px' }}>
+              <h1 className="pixel-heading text-d3sk-green mb-3 crt-glow text-pixel-2xl">CREATE OFFER</h1>
+              <p className="font-retro text-d3sk-text mb-6 text-retro-base">
                 YOUR TOKENS STAY IN YOUR WALLET
               </p>
 
               <div className="bg-d3sk-surface border-2 border-d3sk-border p-6 mb-6">
-                <p className="terminal-text text-d3sk-text mb-4" style={{ fontSize: '12px' }}>
+                <p className="font-retro text-d3sk-text mb-4 text-retro-base">
                   CONNECT WALLET TO CREATE OFFERS
                 </p>
                 <button
@@ -185,11 +179,11 @@ export default function CreateOffer() {
         {/* Header */}
         <div className="pixel-window border-3 border-d3sk-border shadow-pixel mb-6">
           <div className="pixel-window-title bg-d3sk-green text-d3sk-bg">
-            <span className="text-pixel-xs font-pixel">NEW ORDER TERMINAL</span>
+            <span className="text-pixel-sm font-pixel">NEW ORDER TERMINAL</span>
           </div>
           <div className="pixel-window-body bg-d3sk-bg p-4">
-            <h1 className="pixel-heading text-d3sk-green mb-2 crt-glow" style={{ fontSize: '20px' }}>CREATE OFFER</h1>
-            <p className="terminal-text text-d3sk-text text-pixel-xs" style={{ fontSize: '10px' }}>
+            <h1 className="pixel-heading text-d3sk-green mb-2 crt-glow text-pixel-2xl">CREATE OFFER</h1>
+            <p className="font-retro text-d3sk-text text-retro-sm">
               YOUR TOKENS STAY IN YOUR WALLET
             </p>
           </div>
@@ -199,17 +193,17 @@ export default function CreateOffer() {
         <form onSubmit={handleSubmit} className="pixel-window border-3 border-d3sk-border shadow-pixel mb-6">
             {/* Window Title */}
           <div className="pixel-window-title bg-d3sk-cyan text-d3sk-bg mb-4">
-            <span className="text-pixel-xs font-pixel">ORDER PARAMETERS</span>
+            <span className="text-pixel-sm font-pixel">ORDER PARAMETERS</span>
           </div>
 
           {/* Token Pair Selection */}
           <div className="pixel-window-body bg-d3sk-bg p-4 space-y-4 mb-4">
             {/* Sell Token Section */}
             <div>
-              <label className="block text-pixel-xs font-pixel text-d3sk-green mb-2">
+              <label className="block text-pixel-sm font-pixel text-d3sk-green mb-2">
                 YOU SELL
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <div className="flex-1">
                   <TokenSelect
                     value={sellToken}
@@ -225,17 +219,16 @@ export default function CreateOffer() {
                     placeholder="0.00000000"
                     value={sellAmount}
                     onChange={(e) => setSellAmount(e.target.value)}
-                    className="input-field w-full font-mono bg-d3sk-surface text-d3sk-text border-2 border-d3sk-border text-pixel-xs"
-                    style={{ fontFamily: '"VT323"' }}
+                    className="input-field w-full font-retro bg-d3sk-surface text-d3sk-text border-2 border-d3sk-border text-retro-base"
                   />
                 </div>
               </div>
               <div className="flex justify-between items-center mt-1">
-                <p className="text-pixel-xs text-d3sk-muted">
+                <p className="text-retro-sm text-d3sk-muted font-retro">
                   {TOKEN_REGISTRY[sellToken]?.label || sellToken}
                 </p>
                 {priceMetrics && sellAmount && (
-                  <p className="text-pixel-xs text-d3sk-yellow font-mono">
+                  <p className="text-retro-sm text-d3sk-yellow font-retro">
                     ${priceMetrics.sellUsd}
                   </p>
                 )}
@@ -252,16 +245,16 @@ export default function CreateOffer() {
                   setAskToken(sellToken)
                 }}
               >
-                <span className="pixel-heading text-pixel-xs" style={{ fontSize: '10px' }}>⇅</span>
+                <span className="pixel-heading text-pixel-base">⇅</span>
               </button>
             </div>
 
             {/* Ask Token Section */}
             <div>
-              <label className="block text-pixel-xs font-pixel text-d3sk-cyan mb-2">
+              <label className="block text-pixel-sm font-pixel text-d3sk-cyan mb-2">
                 YOU WANT
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <div className="flex-1">
                   <TokenSelect
                     value={askToken}
@@ -277,17 +270,16 @@ export default function CreateOffer() {
                     placeholder="0.00000000"
                     value={askAmount}
                     onChange={(e) => setAskAmount(e.target.value)}
-                    className="input-field w-full font-mono bg-d3sk-surface text-d3sk-text border-2 border-d3sk-border text-pixel-xs"
-                    style={{ fontFamily: '"VT323"' }}
+                    className="input-field w-full font-retro bg-d3sk-surface text-d3sk-text border-2 border-d3sk-border text-retro-base"
                   />
                 </div>
               </div>
               <div className="flex justify-between items-center mt-1">
-                <p className="text-pixel-xs text-d3sk-muted">
+                <p className="text-retro-sm text-d3sk-muted font-retro">
                   {TOKEN_REGISTRY[askToken]?.label || askToken}
                 </p>
                 {priceMetrics && askAmount && (
-                  <p className="text-pixel-xs text-d3sk-yellow font-mono">
+                  <p className="text-retro-sm text-d3sk-yellow font-retro">
                     ${priceMetrics.askUsd}
                   </p>
                 )}
@@ -296,15 +288,14 @@ export default function CreateOffer() {
           </div>
 
           {/* Expiration Duration */}
-          <div className="mb-4">
-            <label className="block text-pixel-xs font-pixel text-d3sk-yellow mb-2">
+          <div className="px-4 mb-4">
+            <label className="block text-pixel-sm font-pixel text-d3sk-yellow mb-2">
               EXPIRATION
             </label>
             <select
               value={expiration}
               onChange={(e) => setExpiration(e.target.value)}
-              className="input-field w-full bg-d3sk-surface text-d3sk-text border-2 border-d3sk-border text-pixel-xs"
-              style={{ fontFamily: '"VT323"' }}
+              className="input-field w-full bg-d3sk-surface text-d3sk-text border-2 border-d3sk-border text-retro-base font-retro"
             >
               {EXPIRATION_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -312,7 +303,7 @@ export default function CreateOffer() {
                 </option>
               ))}
             </select>
-            <p className="text-pixel-xs text-d3sk-muted mt-1">
+            <p className="text-retro-sm text-d3sk-muted font-retro mt-1">
               {expiration === '0'
                 ? 'NEVER EXPIRES'
                 : 'AUTO DESTROY ON EXPIRATION'}
@@ -321,8 +312,8 @@ export default function CreateOffer() {
 
           {/* Same Token Warning */}
           {sellToken === askToken && (
-            <div className="bg-d3sk-red/20 border-2 border-d3sk-red p-3 mb-4">
-              <p className="text-pixel-xs text-d3sk-red font-pixel">
+            <div className="bg-d3sk-red/20 border-2 border-d3sk-red p-3 mx-4 mb-4">
+              <p className="text-pixel-sm text-d3sk-red font-pixel">
                 ERROR: SAME TOKEN
               </p>
             </div>
@@ -330,26 +321,26 @@ export default function CreateOffer() {
 
           {/* Auto-calculated Price Display - Monitor Panel */}
           {priceMetrics && (
-            <div className="monitor-panel bg-d3sk-surface border-2 border-d3sk-cyan p-3 mb-4">
-              <div className="pixel-window-title bg-d3sk-cyan text-d3sk-bg mb-2">
-                <span className="text-pixel-xs font-pixel">PRICE MONITOR</span>
+            <div className="monitor-panel bg-d3sk-surface border-2 border-d3sk-cyan p-4 mx-4 mb-4">
+              <div className="pixel-window-title bg-d3sk-cyan text-d3sk-bg mb-3">
+                <span className="text-pixel-sm font-pixel">PRICE MONITOR</span>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-pixel-xs text-d3sk-muted">PRICE:</span>
-                  <span className="font-mono text-d3sk-text text-pixel-xs">
+                  <span className="text-retro-sm text-d3sk-muted font-retro">PRICE:</span>
+                  <span className="font-retro text-d3sk-text text-retro-base">
                     {priceMetrics.price}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-pixel-xs text-d3sk-muted">USD:</span>
-                  <span className="font-mono text-d3sk-yellow text-pixel-xs">
+                  <span className="text-retro-sm text-d3sk-muted font-retro">USD:</span>
+                  <span className="font-retro text-d3sk-yellow text-retro-base">
                     ${priceMetrics.priceUsd}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-pixel-xs text-d3sk-muted">INVERSE:</span>
-                  <span className="font-mono text-d3sk-text text-pixel-xs">
+                  <span className="text-retro-sm text-d3sk-muted font-retro">INVERSE:</span>
+                  <span className="font-retro text-d3sk-text text-retro-base">
                     {priceMetrics.inversePrice}
                   </span>
                 </div>
@@ -359,30 +350,30 @@ export default function CreateOffer() {
 
           {/* Summary Panel */}
           {isFormValid && (
-            <div className="space-y-3 mb-4">
+            <div className="space-y-3 mx-4 mb-4">
               {/* Offer Summary */}
-              <div className="bg-d3sk-surface border-2 border-d3sk-green p-3">
-                <p className="text-pixel-xs text-d3sk-muted mb-1">OFFER SUMMARY</p>
-                <p className="terminal-text text-d3sk-text text-pixel-xs">
+              <div className="bg-d3sk-surface border-2 border-d3sk-green p-4">
+                <p className="text-pixel-sm text-d3sk-muted font-pixel mb-2">OFFER SUMMARY</p>
+                <p className="font-retro text-d3sk-text text-retro-base">
                   {sellAmount} {TOKEN_REGISTRY[sellToken]?.label} FOR {askAmount}{' '}
                   {TOKEN_REGISTRY[askToken]?.label}
                 </p>
                 {priceMetrics && (
-                  <p className="text-pixel-xs text-d3sk-muted mt-1">
+                  <p className="text-retro-sm text-d3sk-muted font-retro mt-1">
                     ${priceMetrics.sellUsd} → ${priceMetrics.askUsd}
                   </p>
                 )}
                 {expiration !== '0' && (
-                  <p className="text-pixel-xs text-d3sk-yellow mt-1">
+                  <p className="text-retro-sm text-d3sk-yellow font-retro mt-1">
                     EXP: {EXPIRATION_OPTIONS.find(o => o.value === expiration)?.label || 'N/A'}
                   </p>
                 )}
               </div>
 
               {/* Zero-Custody Reminder */}
-              <div className="bg-d3sk-green/20 border-2 border-d3sk-green p-3">
-                <p className="font-pixel text-d3sk-green text-pixel-xs mb-1">SAFE MODE</p>
-                <p className="text-pixel-xs text-d3sk-green/80">
+              <div className="bg-d3sk-green/20 border-2 border-d3sk-green p-4">
+                <p className="font-pixel text-d3sk-green text-pixel-sm mb-1">SAFE MODE</p>
+                <p className="text-retro-sm text-d3sk-green/80 font-retro">
                   TOKENS LOCKED IN YOUR WALLET. NO CONTRACT CUSTODY.
                 </p>
               </div>
@@ -391,12 +382,12 @@ export default function CreateOffer() {
 
           {/* Error Display */}
           {error && txStatus === 'error' && (
-            <div className="bg-d3sk-red/20 border-2 border-d3sk-red p-3 mb-4">
-              <p className="text-pixel-xs text-d3sk-red mb-2">{error}</p>
+            <div className="bg-d3sk-red/20 border-2 border-d3sk-red p-4 mx-4 mb-4">
+              <p className="text-retro-sm text-d3sk-red font-retro mb-2">{error}</p>
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-pixel-xs btn-secondary px-3 py-1 shadow-pixel"
+                className="btn-secondary px-4 py-2 text-pixel-sm shadow-pixel"
               >
                 RETRY
               </button>
@@ -405,39 +396,39 @@ export default function CreateOffer() {
 
           {/* Transaction Status Display */}
           {txStatus && txStatus !== 'error' && (
-            <div className="monitor-panel bg-d3sk-surface border-2 border-d3sk-cyan p-3 mb-4">
-              <div className="pixel-window-title bg-d3sk-cyan text-d3sk-bg mb-2">
-                <span className="text-pixel-xs font-pixel">TRANSMIT LOG</span>
+            <div className="monitor-panel bg-d3sk-surface border-2 border-d3sk-cyan p-4 mx-4 mb-4">
+              <div className="pixel-window-title bg-d3sk-cyan text-d3sk-bg mb-3">
+                <span className="text-pixel-sm font-pixel">TRANSMIT LOG</span>
               </div>
-              <div className="space-y-2 text-pixel-xs">
+              <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className={`${
+                  <span className={`text-retro-base ${
                     txStatus === 'pending' || txStatus === 'submitted' || txStatus === 'sealed'
                       ? 'text-d3sk-yellow'
                       : 'text-d3sk-green'
                   }`}>●</span>
-                  <span className="text-d3sk-text">
+                  <span className="text-d3sk-text font-retro text-retro-base">
                     {txStatus === 'pending' || txStatus === 'submitted' ? 'CREATING...' : 'CREATED'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`${
+                  <span className={`text-retro-base ${
                     txStatus === 'sealed' ? 'text-d3sk-green' : 'text-d3sk-muted'
                   }`}>●</span>
-                  <span className={txStatus === 'sealed' ? 'text-d3sk-green' : 'text-d3sk-muted'}>
+                  <span className={`font-retro text-retro-base ${txStatus === 'sealed' ? 'text-d3sk-green' : 'text-d3sk-muted'}`}>
                     {txStatus === 'sealed' ? 'CONFIRMED' : 'CONFIRMING...'}
                   </span>
                 </div>
 
                 {/* Transaction ID */}
                 {txId && (
-                  <div className="pt-1 border-t border-d3sk-border">
-                    <p className="text-pixel-xs text-d3sk-muted mb-0.5">TX ID:</p>
+                  <div className="pt-2 border-t border-d3sk-border">
+                    <p className="text-retro-sm text-d3sk-muted font-retro mb-1">TX ID:</p>
                     <a
                       href={`https://flowscan.org/transaction/${txId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-pixel-xs text-d3sk-cyan hover:text-d3sk-green font-mono truncate block"
+                      className="text-retro-sm text-d3sk-cyan hover:text-d3sk-green font-retro truncate block"
                     >
                       {txId}
                     </a>
@@ -449,15 +440,15 @@ export default function CreateOffer() {
 
           {/* Success State */}
           {txStatus === 'sealed' && (
-            <div className="bg-d3sk-green/20 border-2 border-d3sk-green p-3 mb-4">
-              <p className="font-pixel text-d3sk-green text-pixel-xs mb-2">SUCCESS!</p>
-              <p className="text-pixel-xs text-d3sk-green/80 mb-2">
+            <div className="bg-d3sk-green/20 border-2 border-d3sk-green p-4 mx-4 mb-4">
+              <p className="font-pixel text-d3sk-green text-pixel-sm mb-2">SUCCESS!</p>
+              <p className="text-retro-sm text-d3sk-green/80 font-retro mb-3">
                 OFFER IS LIVE ON THE ORDERBOOK
               </p>
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="text-pixel-xs btn-secondary px-3 py-1 shadow-pixel"
+                className="btn-secondary px-4 py-2 text-pixel-sm shadow-pixel"
               >
                 VIEW ORDERBOOK
               </button>
@@ -465,35 +456,37 @@ export default function CreateOffer() {
           )}
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className={`w-full py-2 font-pixel text-pixel-xs transition-all shadow-pixel ${
-              canSubmit
-                ? 'btn-primary hover:translate-y-0.5'
-                : 'bg-d3sk-border text-d3sk-muted cursor-not-allowed'
-            }`}
-          >
-            {!isConnected
-              ? 'CONNECT WALLET'
-              : isSubmitting || txStatus === 'pending' || txStatus === 'submitted'
-              ? txStatus === 'pending'
-                ? 'CREATING...'
-                : 'CONFIRMING...'
-              : txStatus === 'sealed'
-              ? 'CREATED!'
-              : 'EXECUTE ORDER'}
-          </button>
+          <div className="px-4 pb-4">
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className={`w-full py-3 font-pixel text-pixel-sm transition-all shadow-pixel ${
+                canSubmit
+                  ? 'btn-primary hover:translate-y-0.5'
+                  : 'bg-d3sk-border text-d3sk-muted cursor-not-allowed'
+              }`}
+            >
+              {!isConnected
+                ? 'CONNECT WALLET'
+                : isSubmitting || txStatus === 'pending' || txStatus === 'submitted'
+                ? txStatus === 'pending'
+                  ? 'CREATING...'
+                  : 'CONFIRMING...'
+                : txStatus === 'sealed'
+                ? 'CREATED!'
+                : 'EXECUTE ORDER'}
+            </button>
+          </div>
         </form>
 
         {/* Additional Info */}
         <div className="pixel-window border-2 border-d3sk-border shadow-pixel">
           <div className="pixel-window-title bg-d3sk-yellow text-d3sk-bg">
-            <span className="text-pixel-xs font-pixel">README</span>
+            <span className="text-pixel-sm font-pixel">README</span>
           </div>
-          <div className="pixel-window-body bg-d3sk-bg p-3 text-pixel-xs text-d3sk-text">
-            <p className="mb-2 font-pixel">HOW IT WORKS:</p>
-            <ul className="space-y-0.5 text-pixel-xs text-d3sk-muted">
+          <div className="pixel-window-body bg-d3sk-bg p-4">
+            <p className="mb-3 font-pixel text-d3sk-text text-pixel-sm">HOW IT WORKS:</p>
+            <ul className="space-y-1 font-retro text-d3sk-muted text-retro-sm">
               <li>1. TOKENS LOCKED IN WALLET</li>
               <li>2. VISIBLE ON ORDERBOOK</li>
               <li>3. ATOMIC SWAP ON FILL</li>
