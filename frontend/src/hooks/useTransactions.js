@@ -46,7 +46,7 @@ export function useTransactions() {
           import NonFungibleToken from ${config.nonFungibleToken}
           import ${sellTokenConfig.contractName} from ${sellTokenConfig.contractAddress}
           import D3SKOfferNFT from ${config.d3skOfferNFT}
-          import D3SKFillProxy from ${config.d3skFillProxy}
+          import D3SKFillProxy from ${config.d3skOfferNFT}
 
           transaction(sellAmount: UFix64, askTokenTypeIdentifier: String, askAmount: UFix64, duration: UFix64) {
               prepare(signer: auth(BorrowValue, SaveValue, LoadValue, IssueStorageCapabilityController, PublishCapability, UnpublishCapability) &Account) {
@@ -146,7 +146,7 @@ export function useTransactions() {
           import FungibleToken from ${config.fungibleToken}
           import ${paymentTokenConfig.contractName} from ${paymentTokenConfig.contractAddress}
           import D3SKOfferNFT from ${config.d3skOfferNFT}
-          import D3SKFillProxy from ${config.d3skFillProxy}
+          import D3SKFillProxy from ${config.d3skOfferNFT}
 
           transaction(holderAddress: Address, offerID: UInt64, paymentAmount: UFix64) {
               prepare(signer: auth(BorrowValue) &Account) {
