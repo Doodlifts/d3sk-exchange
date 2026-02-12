@@ -4,18 +4,7 @@
     "testnet": "access.devnet.nodes.onflow.org:9000",
     "mainnet": "access.mainnet.nodes.onflow.org:9000"
   },
-  "accounts": {
-    "mainnet-deployer": {
-      "address": "0x5ec90e3dcf0067c4",
-      "key": {
-        "type": "file",
-        "location": "mainnet-deployer.pkey",
-        "index": 16,
-        "signatureAlgorithm": "ECDSA_P256",
-        "hashAlgorithm": "SHA3_256"
-      }
-    }
-  },
+  "accounts": {},
   "contracts": {
     "D3SKOfferNFT": {
       "source": "./contracts/D3SKOfferNFT.cdc"
