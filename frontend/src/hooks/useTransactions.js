@@ -39,7 +39,7 @@ export function useTransactions() {
           import D3SKOfferNFT from ${config.d3skOfferNFT}
 
           transaction(sellAmount: UFix64, askTokenTypeIdentifier: String, askAmount: UFix64, duration: UFix64) {
-              prepare(signer: auth(BorrowValue, SaveValue, LoadValue, IssueStorageCapabilityController, PublishCapability) &Account) {
+              prepare(signer: auth(BorrowValue, SaveValue, LoadValue, IssueStorageCapabilityController, PublishCapability, UnpublishCapability) &Account) {
                   // Calculate expiration
                   var expiresAt: UFix64? = nil
                   if duration > 0.0 {
@@ -48,15 +48,15 @@ export function useTransactions() {
 
                   // Setup NFT Collection if needed
                   if signer.storage.borrow<&D3SKOfferNFT.Collection>(from: D3SKOfferNFT.CollectionStoragePath) == nil {
-                      let collection <- D3SKOfferNFT.createEmptyCollection(nftType: Type<@D3SKOfferNFT.NFT>())
-                      signer.storage.save(<-collection, to: D3SKOfferNFT.CollectionStoragePath)
-
-                      // Publish with Fill entitlement so anyone can fill offers
-                      let cap = signer.capabilities.storage.issue<
-                          auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection
-                      >(D3SKOfferNFT.CollectionStoragePath)
-                      signer.capabilities.publish(cap, at: D3SKOfferNFT.CollectionPublicPath)
+                      signer.storage.save(<- D3SKOfferNFT.createEmptyCollection(nftType: Type<@D3SKOfferNFT.NFT>()), to: D3SKOfferNFT.CollectionStoragePath)
                   }
+
+                  // Ensure public capability is published (safe: unpublish stale, then publish fresh)
+                  signer.capabilities.unpublish(D3SKOfferNFT.CollectionPublicPath)
+                  let cap = signer.capabilities.storage.issue<
+                      auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection
+                  >(D3SKOfferNFT.CollectionStoragePath)
+                  signer.capabilities.publish(cap, at: D3SKOfferNFT.CollectionPublicPath)
 
                   // Withdraw sell tokens
                   let vaultRef = signer.storage.borrow<auth(FungibleToken.Withdraw) &${sellTokenConfig.vaultType}>(
