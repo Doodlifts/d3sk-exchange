@@ -1,0 +1,427 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* Pixel-perfect rendering */
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Disable font smoothing for crispy pixel text */
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    font-smooth: never;
+  }
+
+  body {
+    font-family: 'VT323', 'Courier New', monospace;
+    background-color: #0f0e17;
+    color: #e8e8e8;
+    min-height: 100vh;
+    font-size: 20px;
+    line-height: 1.4;
+    /* CRT scanline overlay */
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 8px 8px;
+  }
+
+  /* Pixel-style scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0f0e17;
+    border-left: 3px solid #3d3d5c;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3d3d5c;
+    border: 2px solid #0f0e17;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #5a5a7a;
+  }
+
+  /* Selection color */
+  ::selection {
+    background: #00ff41;
+    color: #0f0e17;
+  }
+}
+
+@layer components {
+  /* ═══════════════════════════════════════════════════
+     PIXEL WINDOW - The core UI container
+     Looks like an old OS window with title bar
+     ═══════════════════════════════════════════════════ */
+  .pixel-window {
+    @apply bg-d3sk-surface border-3 border-d3sk-border relative;
+    box-shadow: 4px 4px 0px #000000, inset 1px 1px 0px rgba(255,255,255,0.1);
+  }
+
+  .pixel-window-title {
+    @apply bg-d3sk-border px-4 py-2 font-pixel text-pixel-xs text-d3sk-accent uppercase tracking-wider
+           flex items-center justify-between;
+    border-bottom: 3px solid #2a2a44;
+  }
+
+  .pixel-window-title-dots {
+    @apply flex gap-2;
+  }
+
+  .pixel-window-title-dot {
+    @apply w-3 h-3 border-2 border-d3sk-muted;
+  }
+
+  .pixel-window-body {
+    @apply p-4;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     MONITOR PANEL - CRT monitor look
+     ═══════════════════════════════════════════════════ */
+  .monitor-panel {
+    @apply bg-d3sk-bg border-4 border-d3sk-border relative overflow-hidden;
+    box-shadow:
+      inset 0 0 30px rgba(0,0,0,0.5),
+      0 0 2px rgba(0,255,65,0.2),
+      4px 4px 0px #000000;
+  }
+
+  .monitor-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      transparent 50%,
+      rgba(0, 0, 0, 0.05) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     GLASS PANEL - Keep backward compat
+     ═══════════════════════════════════════════════════ */
+  .glass-panel {
+    @apply bg-d3sk-surface border-3 border-d3sk-border;
+    box-shadow: 4px 4px 0px #000000;
+  }
+
+  .glow-border {
+    @apply border-3 border-d3sk-accent;
+    box-shadow: 4px 4px 0px #000000, 0 0 10px rgba(0,255,65,0.2);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     BUTTONS - Pixel art style
+     ═══════════════════════════════════════════════════ */
+  .btn-primary {
+    @apply px-6 py-3 bg-d3sk-accent text-d3sk-bg font-retro text-retro-base font-bold
+           border-3 border-d3sk-accentDark uppercase tracking-wider
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    box-shadow: 4px 4px 0px #005500;
+    transition: all 0.1s steps(2);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #005500;
+  }
+
+  .btn-primary:active:not(:disabled) {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px #005500;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-d3sk-surface border-3 border-d3sk-border text-d3sk-text
+           font-retro text-retro-base uppercase tracking-wider
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    box-shadow: 4px 4px 0px #000000;
+    transition: all 0.1s steps(2);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    @apply border-d3sk-cyan text-d3sk-cyan;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #000000;
+  }
+
+  .btn-danger {
+    @apply px-6 py-3 bg-d3sk-surface border-3 border-d3sk-red text-d3sk-red
+           font-retro text-retro-base uppercase tracking-wider;
+    box-shadow: 4px 4px 0px #660022;
+    transition: all 0.1s steps(2);
+  }
+
+  .btn-danger:hover {
+    @apply bg-d3sk-red text-d3sk-bg;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #660022;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     INPUT FIELDS - Terminal style
+     ═══════════════════════════════════════════════════ */
+  .input-field {
+    @apply w-full px-4 py-3 bg-d3sk-bg border-3 border-d3sk-border
+           text-d3sk-text font-retro text-retro-base
+           placeholder:text-d3sk-muted
+           focus:outline-none focus:border-d3sk-accent;
+    box-shadow: inset 2px 2px 0px rgba(0,0,0,0.3);
+    transition: border-color 0.1s steps(2);
+  }
+
+  .input-field:focus {
+    box-shadow: inset 2px 2px 0px rgba(0,0,0,0.3), 0 0 8px rgba(0,255,65,0.15);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     STAT VALUES
+     ═══════════════════════════════════════════════════ */
+  .stat-value {
+    @apply text-retro-2xl font-retro text-d3sk-accent;
+    text-shadow: 0 0 10px rgba(0,255,65,0.3);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     PIXEL TEXT HELPERS
+     ═══════════════════════════════════════════════════ */
+  .pixel-heading {
+    @apply font-pixel uppercase tracking-wider;
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+  }
+
+  .terminal-text {
+    @apply font-retro;
+    text-shadow: 0 0 5px currentColor;
+  }
+
+  /* Blinking cursor effect */
+  .cursor-blink::after {
+    content: '█';
+    animation: blink 1s step-end infinite;
+    color: #00ff41;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     CRT EFFECTS
+     ═══════════════════════════════════════════════════ */
+  .crt-glow {
+    text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+  }
+
+  .crt-flicker {
+    animation: flicker 0.15s infinite;
+  }
+
+  /* Scanline overlay for any element */
+  .scanlines::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     PIXEL DECORATIONS
+     ═══════════════════════════════════════════════════ */
+  .pixel-divider {
+    @apply w-full h-px bg-d3sk-border;
+    background-image: repeating-linear-gradient(
+      90deg,
+      #3d3d5c 0px,
+      #3d3d5c 4px,
+      transparent 4px,
+      transparent 8px
+    );
+    height: 3px;
+  }
+
+  /* Pixel corners decoration */
+  .pixel-corners::before,
+  .pixel-corners::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 3px solid #00ff41;
+  }
+
+  .pixel-corners::before {
+    top: -3px;
+    left: -3px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .pixel-corners::after {
+    bottom: -3px;
+    right: -3px;
+    border-left: none;
+    border-top: none;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     TABLE STYLES - Retro terminal table
+     ═══════════════════════════════════════════════════ */
+  .pixel-table {
+    @apply w-full font-retro;
+  }
+
+  .pixel-table thead tr {
+    @apply border-b-3 border-d3sk-border bg-d3sk-surface;
+  }
+
+  .pixel-table th {
+    @apply px-4 py-3 text-left text-d3sk-muted font-pixel text-pixel-xs uppercase tracking-wider;
+  }
+
+  .pixel-table tbody tr {
+    @apply border-b border-d3sk-border/50;
+    transition: background-color 0.1s steps(2);
+  }
+
+  .pixel-table tbody tr:hover {
+    @apply bg-d3sk-surfaceLight;
+  }
+
+  .pixel-table td {
+    @apply px-4 py-3 text-retro-base;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     PRICE COLORS
+     ═══════════════════════════════════════════════════ */
+  .price-green {
+    @apply text-d3sk-green;
+    text-shadow: 0 0 5px rgba(0,255,65,0.3);
+  }
+
+  .price-red {
+    @apply text-d3sk-red;
+    text-shadow: 0 0 5px rgba(255,0,85,0.3);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     LOADING - Pixel spinner
+     ═══════════════════════════════════════════════════ */
+  @keyframes pixelSpin {
+    0% { content: '|'; }
+    25% { content: '/'; }
+    50% { content: '—'; }
+    75% { content: '\\'; }
+  }
+
+  .pixel-spinner::after {
+    content: '|';
+    animation: blink 0.5s step-end infinite;
+    font-family: 'VT323', monospace;
+    font-size: 24px;
+    color: #00ff41;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     SCROLLING TICKER - Retro stock ticker tape
+     ═══════════════════════════════════════════════════ */
+  .ticker-wrap {
+    @apply w-full overflow-hidden bg-d3sk-bg border-b-2 border-d3sk-border;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    height: 32px;
+  }
+
+  .ticker-track {
+    @apply flex items-center whitespace-nowrap;
+    animation: ticker-scroll 40s linear infinite;
+    width: max-content;
+  }
+
+  .ticker-track:hover {
+    animation-play-state: paused;
+  }
+
+  .ticker-item {
+    @apply inline-flex items-center gap-1 px-4 font-retro;
+    font-size: 14px;
+    line-height: 32px;
+  }
+
+  .ticker-item .ticker-symbol {
+    @apply font-pixel text-d3sk-text uppercase;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .ticker-item .ticker-price {
+    @apply font-mono text-d3sk-cyan;
+    font-size: 14px;
+  }
+
+  .ticker-item .ticker-change {
+    font-size: 12px;
+  }
+
+  .ticker-item .ticker-change.up {
+    @apply text-d3sk-green;
+  }
+
+  .ticker-item .ticker-change.down {
+    @apply text-d3sk-red;
+  }
+
+  .ticker-item .ticker-change.flat {
+    @apply text-d3sk-muted;
+  }
+
+  .ticker-divider {
+    @apply inline-block text-d3sk-border px-2;
+    font-size: 10px;
+  }
+
+  @keyframes ticker-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     TOAST OVERRIDES
+     ═══════════════════════════════════════════════════ */
+  [data-sonner-toast] {
+    font-family: 'VT323', monospace !important;
+    border: 3px solid #3d3d5c !important;
+    box-shadow: 4px 4px 0px #000000 !important;
+  }
+}

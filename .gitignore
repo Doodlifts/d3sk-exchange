@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+dist/
+build/
+.vite/
+
+# Environment (never commit secrets)
+.env
+.env.local
+.env.*.local
+*.pkey
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vite temp files
+*.timestamp-*
+
+# Logs
+*.log
+npm-debug.log*
