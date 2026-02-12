@@ -48,7 +48,7 @@ export function useTransactions() {
           import D3SKOfferNFT from ${config.d3skOfferNFT}
 
           transaction(sellAmount: UFix64, askTokenTypeIdentifier: String, askAmount: UFix64, duration: UFix64) {
-              prepare(signer: auth(BorrowValue, SaveValue, LoadValue) &Account) {
+              prepare(signer: auth(BorrowValue, SaveValue, LoadValue, IssueStorageCapabilityController, PublishCapability, UnpublishCapability) &Account) {
                   // Calculate expiration
                   var expiresAt: UFix64? = nil
                   if duration > 0.0 {
@@ -58,6 +58,14 @@ export function useTransactions() {
                   // Setup NFT Collection if not already in storage
                   if signer.storage.borrow<&D3SKOfferNFT.Collection>(from: D3SKOfferNFT.CollectionStoragePath) == nil {
                       signer.storage.save(<- D3SKOfferNFT.createEmptyCollection(nftType: Type<@D3SKOfferNFT.NFT>()), to: D3SKOfferNFT.CollectionStoragePath)
+                  }
+
+                  // Publish auth(Fill) capability so takers can call access(Fill) fillOffer
+                  // Always unpublish first to clear any stale/wrong-typed capability
+                  if !signer.capabilities.get<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionPublicPath).check() {
+                      signer.capabilities.unpublish(D3SKOfferNFT.CollectionPublicPath)
+                      let cap = signer.capabilities.storage.issue<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionStoragePath)
+                      signer.capabilities.publish(cap, at: D3SKOfferNFT.CollectionPublicPath)
                   }
 
                   // Withdraw sell tokens
@@ -136,7 +144,7 @@ export function useTransactions() {
 
           transaction(holderAddress: Address, offerID: UInt64, paymentAmount: UFix64) {
               prepare(signer: auth(BorrowValue) &Account) {
-                  // Borrow the HOLDER's collection (not maker's — holder may differ if NFT was transferred)
+                  // Borrow the holder's collection with Fill entitlement (published by createOffer)
                   let collectionRef = getAccount(holderAddress)
                       .capabilities.borrow<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(
                           D3SKOfferNFT.CollectionPublicPath

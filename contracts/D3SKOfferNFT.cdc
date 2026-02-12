@@ -625,8 +625,8 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
             return nil
         }
 
-        // ── Fill an offer (public via Fill entitlement) ───────────
-        // Payment goes to holderAddress (whoever owns this collection)
+        // ── Fill an offer (requires Fill entitlement) ──
+        // Payment always routes to offer maker (prevents redirect attacks)
         access(Fill) fun fillOffer(
             id: UInt64,
             payment: @{FungibleToken.Vault},
@@ -639,10 +639,13 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
                 ?? panic("Offer not found")
             let offerNFT <- nft as! @D3SKOfferNFT.NFT
 
+            // V1 security: enforce payment goes to the offer maker, not arbitrary address
+            assert(holderAddress == offerNFT.maker, message: "Payment must route to offer maker")
+
             // Execute fill — pays the holder, returns sell tokens to taker
             let sellTokens <- offerNFT.fill(
                 payment: <-payment,
-                holderAddress: holderAddress,
+                holderAddress: offerNFT.maker,
                 takerAddress: takerAddress,
                 askReceiverPath: askReceiverPath
             )
@@ -652,6 +655,25 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
             destroy old
 
             return <-sellTokens
+        }
+
+        // ── Public fill wrapper (no entitlement needed) ──────────────
+        // Callable via non-auth &Collection capability.
+        // Delegates to access(Fill) fillOffer via self (which has all entitlements).
+        access(all) fun fillOfferPublic(
+            id: UInt64,
+            payment: @{FungibleToken.Vault},
+            holderAddress: Address,
+            takerAddress: Address,
+            askReceiverPath: PublicPath
+        ): @{FungibleToken.Vault} {
+            return <-self.fillOffer(
+                id: id,
+                payment: <-payment,
+                holderAddress: holderAddress,
+                takerAddress: takerAddress,
+                askReceiverPath: askReceiverPath
+            )
         }
 
         // ── Cancel an offer (holder only via Cancel entitlement) ──
