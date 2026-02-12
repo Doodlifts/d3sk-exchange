@@ -48,7 +48,7 @@ export function useTransactions() {
           import D3SKOfferNFT from ${config.d3skOfferNFT}
 
           transaction(sellAmount: UFix64, askTokenTypeIdentifier: String, askAmount: UFix64, duration: UFix64) {
-              prepare(signer: auth(BorrowValue, SaveValue, LoadValue, IssueStorageCapabilityController, PublishCapability, UnpublishCapability) &Account) {
+              prepare(signer: auth(BorrowValue, SaveValue, LoadValue) &Account) {
                   // Calculate expiration
                   var expiresAt: UFix64? = nil
                   if duration > 0.0 {
@@ -58,17 +58,6 @@ export function useTransactions() {
                   // Setup NFT Collection if not already in storage
                   if signer.storage.borrow<&D3SKOfferNFT.Collection>(from: D3SKOfferNFT.CollectionStoragePath) == nil {
                       signer.storage.save(<- D3SKOfferNFT.createEmptyCollection(nftType: Type<@D3SKOfferNFT.NFT>()), to: D3SKOfferNFT.CollectionStoragePath)
-                  }
-
-                  // Ensure valid public capability (handles stale/missing/wrong-type caps)
-                  // capabilities.get<T>() returns non-optional Capability<T> in Cadence 1.0
-                  // .check() returns false if no valid capability exists at the path
-                  if !signer.capabilities.get<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionPublicPath).check() {
-                      signer.capabilities.unpublish(D3SKOfferNFT.CollectionPublicPath)
-                      let cap = signer.capabilities.storage.issue<
-                          auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection
-                      >(D3SKOfferNFT.CollectionStoragePath)
-                      signer.capabilities.publish(cap, at: D3SKOfferNFT.CollectionPublicPath)
                   }
 
                   // Withdraw sell tokens
