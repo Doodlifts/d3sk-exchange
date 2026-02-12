@@ -20,6 +20,15 @@ export function useTransactions() {
     setError(null)
   }, [])
 
+  // Helper: wait for seal AND check on-chain success (statusCode 0 = success)
+  const waitForSeal = async (id) => {
+    const txResult = await fcl.tx(id).onceSealed()
+    if (txResult.statusCode !== 0) {
+      throw new Error(txResult.errorMessage || 'Transaction failed on-chain')
+    }
+    return txResult
+  }
+
   // ── Create Offer (Mint NFT) ────────────────────────────────────
   const createOffer = useCallback(
     async (sellAmount, askTokenTypeIdentifier, askAmount, sellTokenKey, duration = "0.0") => {
@@ -46,9 +55,15 @@ export function useTransactions() {
                       expiresAt = getCurrentBlock().timestamp + duration
                   }
 
-                  // Setup NFT Collection + public capability (first time only)
+                  // Setup NFT Collection if not already in storage
                   if signer.storage.borrow<&D3SKOfferNFT.Collection>(from: D3SKOfferNFT.CollectionStoragePath) == nil {
                       signer.storage.save(<- D3SKOfferNFT.createEmptyCollection(nftType: Type<@D3SKOfferNFT.NFT>()), to: D3SKOfferNFT.CollectionStoragePath)
+                  }
+
+                  // Ensure valid public capability (handles stale/missing/wrong-type caps)
+                  let existingCap = signer.capabilities.get<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionPublicPath)
+                  if existingCap == nil || !existingCap!.check() {
+                      signer.capabilities.unpublish(D3SKOfferNFT.CollectionPublicPath)
                       let cap = signer.capabilities.storage.issue<
                           auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection
                       >(D3SKOfferNFT.CollectionStoragePath)
@@ -96,7 +111,7 @@ export function useTransactions() {
         setTxId(id)
         setTxStatus('submitted')
 
-        await fcl.tx(id).onceSealed()
+        await waitForSeal(id)
         setTxStatus('sealed')
       } catch (err) {
         console.error('Error creating offer:', err)
@@ -179,7 +194,7 @@ export function useTransactions() {
         setTxId(id)
         setTxStatus('submitted')
 
-        await fcl.tx(id).onceSealed()
+        await waitForSeal(id)
         setTxStatus('sealed')
       } catch (err) {
         console.error('Error filling offer:', err)
@@ -235,7 +250,7 @@ export function useTransactions() {
         setTxId(id)
         setTxStatus('submitted')
 
-        await fcl.tx(id).onceSealed()
+        await waitForSeal(id)
         setTxStatus('sealed')
       } catch (err) {
         console.error('Error cancelling offer:', err)

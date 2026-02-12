@@ -59,16 +59,16 @@ export const TOKEN_REGISTRY = {
     decimals: 8,
   },
   PYUSD: {
-    // PYUSD0 via LayerZero Asset0 — addresses may need verification
+    // PYUSD0 via LayerZero — EVM-bridged token on Flow Cadence
     // https://developers.flow.com/defi/pyusd0-integration-guide
     testnet: null,
-    mainnet: 'A.0000000000000000.Asset0.Vault', // TODO: verify mainnet address when available
+    mainnet: 'A.1e4aa0b87d10b141.EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750.Vault',
     label: 'PYUSD',
-    contractName: 'Asset0',
-    contractAddress: { testnet: null, mainnet: '0x0000000000000000' }, // TODO: verify
-    storagePath: '/storage/Asset0Vault',
-    receiverPath: '/public/Asset0Receiver',
-    vaultType: 'Asset0.Vault',
+    contractName: 'EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750',
+    contractAddress: { testnet: null, mainnet: '0x1e4aa0b87d10b141' },
+    storagePath: '/storage/EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750Vault',
+    receiverPath: '/public/EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750Receiver',
+    vaultType: 'EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750.Vault',
     icon: '₱',
     coingeckoId: 'paypal-usd',
     isStablecoin: true,
@@ -76,12 +76,12 @@ export const TOKEN_REGISTRY = {
   },
   ceWETH: {
     testnet: null,
-    mainnet: 'A.d01e482eb680ec9f.ceWETH.Vault',
+    mainnet: 'A.231cc0dbbcffc4b7.ceWETH.Vault',
     label: 'WETH',
     contractName: 'ceWETH',
-    contractAddress: { testnet: null, mainnet: '0xd01e482eb680ec9f' },
+    contractAddress: { testnet: null, mainnet: '0x231cc0dbbcffc4b7' },
     storagePath: '/storage/ceWETHVault',
-    receiverPath: '/public/ceWETHReceiver',
+    receiverPath: '/public/ceWETHVault',
     vaultType: 'ceWETH.Vault',
     icon: 'Ξ',
     coingeckoId: 'ethereum',
@@ -89,12 +89,12 @@ export const TOKEN_REGISTRY = {
   },
   ceWBTC: {
     testnet: null,
-    mainnet: 'A.d01e482eb680ec9f.ceWBTC.Vault',
+    mainnet: 'A.231cc0dbbcffc4b7.ceWBTC.Vault',
     label: 'WBTC',
     contractName: 'ceWBTC',
-    contractAddress: { testnet: null, mainnet: '0xd01e482eb680ec9f' },
+    contractAddress: { testnet: null, mainnet: '0x231cc0dbbcffc4b7' },
     storagePath: '/storage/ceWBTCVault',
-    receiverPath: '/public/ceWBTCReceiver',
+    receiverPath: '/public/ceWBTCVault',
     vaultType: 'ceWBTC.Vault',
     icon: '₿',
     coingeckoId: 'bitcoin',
@@ -102,15 +102,15 @@ export const TOKEN_REGISTRY = {
   },
   DUST: {
     testnet: null,
-    mainnet: 'A.921ea449dffec68a.Dust.Vault',
+    mainnet: 'A.921ea449dffec68a.FlovatarDustToken.Vault',
     label: 'DUST',
-    contractName: 'Dust',
+    contractName: 'FlovatarDustToken',
     contractAddress: { testnet: null, mainnet: '0x921ea449dffec68a' },
-    storagePath: '/storage/DustVault',
-    receiverPath: '/public/DustReceiver',
-    vaultType: 'Dust.Vault',
+    storagePath: '/storage/FlovatarDustTokenVault',
+    receiverPath: '/public/FlovatarDustTokenReceiver',
+    vaultType: 'FlovatarDustToken.Vault',
     icon: '✦',
-    coingeckoId: null,
+    coingeckoId: 'flovatar-dust',
     decimals: 8,
   },
   STARLY: {
@@ -145,8 +145,8 @@ export const TOKEN_REGISTRY = {
     label: 'REVV',
     contractName: 'REVV',
     contractAddress: { testnet: null, mainnet: '0xd01e482eb680ec9f' },
-    storagePath: '/storage/REVVVault',
-    receiverPath: '/public/REVVReceiver',
+    storagePath: '/storage/revvVault',
+    receiverPath: '/public/revvReceiver',
     vaultType: 'REVV.Vault',
     icon: 'Ⓡ',
     coingeckoId: 'revv',
@@ -219,17 +219,25 @@ export function getTokenName(typeIdentifier) {
   const nameMap = {
     FlowToken: 'FLOW',
     FiatToken: 'USDC',
-    Asset0: 'PYUSD',
     stFlowToken: 'stFLOW',
     TeleportedTetherToken: 'USDT',
     ceWETH: 'WETH',
     ceWBTC: 'WBTC',
-    Dust: 'DUST',
+    FlovatarDustToken: 'DUST',
     StarlyToken: 'STARLY',
     BloctoToken: 'BLT',
     REVV: 'REVV',
     FUSD: 'FUSD',
   };
+  // Check for EVM bridged tokens (long contract names)
+  if (contractName && contractName.startsWith('EVMVMBridgedToken_')) {
+    // Try to match by the full type identifier against registry
+    for (const [key, token] of Object.entries(TOKEN_REGISTRY)) {
+      if (token.mainnet === typeIdentifier || token.testnet === typeIdentifier) {
+        return token.label;
+      }
+    }
+  }
   return nameMap[contractName] || contractName;
 }
 
