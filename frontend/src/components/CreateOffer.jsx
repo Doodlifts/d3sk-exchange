@@ -124,7 +124,7 @@ export default function CreateOffer() {
 
       // Redirect to order book after a short delay
       setTimeout(() => {
-        navigate('/orderbook');
+        navigate('/');
       }, 1500);
     } catch (err) {
       console.error('Error creating offer:', err);

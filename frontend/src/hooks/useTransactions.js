@@ -2,6 +2,13 @@ import { useState, useCallback } from 'react'
 import { fcl, config, FLOW_NETWORK } from '../config/fcl'
 import { TOKEN_REGISTRY, getTokenConfig } from '../config/tokens'
 
+// Ensure UFix64 values always have a decimal point (FCL requires "1.0" not "1")
+function toUFix64(value) {
+  const str = String(value)
+  if (!str.includes('.')) return str + '.0'
+  return str
+}
+
 export function useTransactions() {
   const [txStatus, setTxStatus] = useState(null)
   const [txId, setTxId] = useState(null)
@@ -85,10 +92,10 @@ export function useTransactions() {
         const id = await fcl.mutate({
           cadence: cadenceCode,
           args: (arg, t) => [
-            arg(sellAmount, t.UFix64),
+            arg(toUFix64(sellAmount), t.UFix64),
             arg(askTokenTypeIdentifier, t.String),
-            arg(askAmount, t.UFix64),
-            arg(duration, t.UFix64),
+            arg(toUFix64(askAmount), t.UFix64),
+            arg(toUFix64(duration), t.UFix64),
           ],
           limit: 9999,
         })
@@ -171,7 +178,7 @@ export function useTransactions() {
           args: (arg, t) => [
             arg(holderAddress, t.Address),
             arg(offerId, t.UInt64),
-            arg(paymentAmount, t.UFix64),
+            arg(toUFix64(paymentAmount), t.UFix64),
           ],
           limit: 9999,
         })
