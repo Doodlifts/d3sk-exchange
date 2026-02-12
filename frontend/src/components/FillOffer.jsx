@@ -81,6 +81,11 @@ export default function FillOffer() {
   const [usdPrices, setUsdPrices] = useState({})
   const [feeRate, setFeeRate] = useState(null) // null = loading
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   useEffect(() => {
     if (offers.length > 0) {
       const found = offers.find((o) => String(o.id) === String(offerId))
