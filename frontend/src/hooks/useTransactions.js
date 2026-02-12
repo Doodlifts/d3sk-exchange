@@ -30,19 +30,15 @@ export function useTransactions() {
           import NonFungibleToken from ${config.nonFungibleToken}
           import ${sellTokenConfig.contractName} from ${sellTokenConfig.contractAddress}
           import D3SKOfferNFT from ${config.d3skOfferNFT}
-          import FlowTransactionScheduler from 0xSCHEDULER
-          import FlowTransactionSchedulerUtils from 0xSCHEDULERUTILS
 
           transaction(sellAmount: UFix64, askTokenTypeIdentifier: String, askAmount: UFix64, duration: UFix64) {
               let offerNFT: @D3SKOfferNFT.NFT
-              let expiresAt: UFix64?
 
               prepare(signer: auth(BorrowValue, SaveValue, LoadValue, IssueStorageCapabilityController, PublishCapability) &Account) {
                   // Calculate expiration
+                  var expiresAt: UFix64? = nil
                   if duration > 0.0 {
-                      self.expiresAt = getCurrentBlock().timestamp + duration
-                  } else {
-                      self.expiresAt = nil
+                      expiresAt = getCurrentBlock().timestamp + duration
                   }
 
                   // Setup NFT Collection if needed
@@ -72,33 +68,8 @@ export function useTransactions() {
                       askTokenType: askType,
                       askAmount: askAmount,
                       makerAddress: signer.address,
-                      expiresAt: self.expiresAt
+                      expiresAt: expiresAt
                   )
-
-                  // Schedule expiration if needed
-                  if self.expiresAt != nil {
-                      let cancelCap = signer.capabilities.storage.issue<
-                          auth(D3SKOfferNFT.Cancel) &D3SKOfferNFT.Collection
-                      >(D3SKOfferNFT.CollectionStoragePath)
-                      let receiverCap = signer.capabilities.storage.issue<
-                          &{FungibleToken.Receiver}
-                      >(${sellTokenConfig.storagePath})
-                      let handler <- D3SKOfferNFT.createExpirationHandler(
-                          offerID: self.offerNFT.id,
-                          holderAddress: signer.address,
-                          collectionCapability: cancelCap,
-                          receiverCapability: receiverCap
-                      )
-                      let handlerPath = StoragePath(identifier: "D3SKExpire_".concat(self.offerNFT.id.toString()))!
-                      signer.storage.save(<-handler, to: handlerPath)
-                      let scheduleCap = signer.capabilities.storage.issue<
-                          auth(FlowTransactionScheduler.Execute) &{FlowTransactionScheduler.TransactionHandler}
-                      >(handlerPath)
-                      FlowTransactionSchedulerUtils.Manager.schedule(
-                          handlerCapability: scheduleCap,
-                          executeAfter: self.expiresAt!
-                      )
-                  }
               }
 
               execute {
