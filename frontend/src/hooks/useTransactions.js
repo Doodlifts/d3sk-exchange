@@ -71,6 +71,12 @@ export function useTransactions() {
                   if signer.storage.borrow<&D3SKOfferNFT.Collection>(from: D3SKOfferNFT.CollectionStoragePath) == nil {
                       signer.storage.save(<- D3SKOfferNFT.createEmptyCollection(nftType: Type<@D3SKOfferNFT.NFT>()), to: D3SKOfferNFT.CollectionStoragePath)
                   }
+                  // Publish NFT collection capability if not already published
+                  if !signer.capabilities.get<&D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionPublicPath).check() {
+                      signer.capabilities.unpublish(D3SKOfferNFT.CollectionPublicPath)
+                      let colCap = signer.capabilities.storage.issue<&D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionStoragePath)
+                      signer.capabilities.publish(colCap, at: D3SKOfferNFT.CollectionPublicPath)
+                  }
 
                   // Setup FillProxy — stores auth(Fill) capability privately inside a resource,
                   // then publishes non-auth &Proxy so takers can call fillOffer without auth

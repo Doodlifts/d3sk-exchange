@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { fcl, config } from '../config/fcl'
@@ -13,6 +13,61 @@ function truncateAddress(addr) {
   return addr.slice(0, 6) + '...' + addr.slice(-4)
 }
 
+// Generate the same SVG as the on-chain D3SKOfferNFT.generateCertificateSVG()
+function generateCertificateSVG({ id, sellTokenName, askTokenName, sellAmount, askAmount, maker, createdAt, expiresAt, status }) {
+  const statusMap = {
+    active:    { text: 'ACTIVE',    fill: 'rgb(0,40,0)',   stroke: 'rgb(0,255,65)' },
+    filled:    { text: 'FILLED',    fill: 'rgb(40,35,0)',  stroke: 'rgb(255,215,0)' },
+    cancelled: { text: 'CANCELLED', fill: 'rgb(40,0,0)',   stroke: 'rgb(255,0,85)' },
+    expired:   { text: 'EXPIRED',   fill: 'rgb(30,30,30)', stroke: 'rgb(128,128,128)' },
+  }
+  const s = statusMap[status] || statusMap.active
+  const sell = parseFloat(sellAmount) || 0
+  const ask = parseFloat(askAmount) || 0
+  const priceDisplay = sell > 0 ? (ask / sell).toFixed(4) : 'N/A'
+  const sellStr = sell.toFixed(4)
+  const askStr = ask.toFixed(4)
+  const addrShort = maker ? (maker.length > 10 ? maker.slice(0, 6) + '..' + maker.slice(-4) : maker) : '???'
+  const createdStr = createdAt ? Math.floor(createdAt).toString() : '—'
+  const expiresStr = expiresAt ? Math.floor(expiresAt).toString() : 'NEVER'
+
+  return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 560' shape-rendering='crispEdges'>` +
+    `<rect width='400' height='560' fill='rgb(15,14,23)'/>` +
+    `<rect x='8' y='8' width='384' height='544' fill='none' stroke='rgb(255,215,0)' stroke-width='4'/>` +
+    `<rect x='16' y='16' width='368' height='528' fill='none' stroke='rgb(61,61,92)' stroke-width='2'/>` +
+    `<rect x='10' y='10' width='8' height='8' fill='rgb(255,215,0)'/>` +
+    `<rect x='382' y='10' width='8' height='8' fill='rgb(255,215,0)'/>` +
+    `<rect x='10' y='542' width='8' height='8' fill='rgb(255,215,0)'/>` +
+    `<rect x='382' y='542' width='8' height='8' fill='rgb(255,215,0)'/>` +
+    `<text x='200' y='56' font-family='monospace' font-size='20' font-weight='bold' fill='rgb(255,215,0)' text-anchor='middle'>D3SK EXCHANGE</text>` +
+    `<rect x='40' y='68' width='320' height='2' fill='rgb(255,215,0)'/>` +
+    `<rect x='40' y='72' width='320' height='1' fill='rgb(61,61,92)'/>` +
+    `<text x='200' y='100' font-family='monospace' font-size='12' fill='rgb(0,229,255)' text-anchor='middle'>OFFER CERTIFICATE</text>` +
+    `<text x='200' y='124' font-family='monospace' font-size='22' font-weight='bold' fill='rgb(255,215,0)' text-anchor='middle'>#${id}</text>` +
+    `<rect x='60' y='140' width='280' height='1' fill='rgb(61,61,92)'/>` +
+    `<text x='200' y='174' font-family='monospace' font-size='18' font-weight='bold' fill='rgb(0,255,65)' text-anchor='middle'>${sellTokenName}</text>` +
+    `<text x='200' y='198' font-family='monospace' font-size='14' fill='rgb(0,229,255)' text-anchor='middle'>---&gt; ${askTokenName}</text>` +
+    `<text x='40' y='240' font-family='monospace' font-size='11' fill='rgb(128,128,128)'>SELLING</text>` +
+    `<text x='40' y='260' font-family='monospace' font-size='16' fill='rgb(0,255,65)'>${sellStr} ${sellTokenName}</text>` +
+    `<text x='40' y='296' font-family='monospace' font-size='11' fill='rgb(128,128,128)'>ASKING</text>` +
+    `<text x='40' y='316' font-family='monospace' font-size='16' fill='rgb(0,229,255)'>${askStr} ${askTokenName}</text>` +
+    `<text x='40' y='352' font-family='monospace' font-size='11' fill='rgb(128,128,128)'>PRICE</text>` +
+    `<text x='40' y='372' font-family='monospace' font-size='14' fill='rgb(255,215,0)'>${priceDisplay} ${askTokenName}/${sellTokenName}</text>` +
+    `<rect x='60' y='390' width='280' height='1' fill='rgb(61,61,92)'/>` +
+    `<rect x='140' y='406' width='120' height='32' rx='2' fill='${s.fill}' stroke='${s.stroke}' stroke-width='2'/>` +
+    `<text x='200' y='427' font-family='monospace' font-size='14' font-weight='bold' fill='${s.stroke}' text-anchor='middle'>${s.text}</text>` +
+    `<text x='40' y='468' font-family='monospace' font-size='10' fill='rgb(128,128,128)'>CREATED: ${createdStr}</text>` +
+    `<text x='40' y='484' font-family='monospace' font-size='10' fill='rgb(128,128,128)'>EXPIRES: ${expiresStr}</text>` +
+    `<text x='40' y='508' font-family='monospace' font-size='10' fill='rgb(128,128,128)'>MAKER: ${addrShort}</text>` +
+    `<rect x='320' y='480' width='40' height='40' rx='20' fill='none' stroke='rgb(255,215,0)' stroke-width='2'/>` +
+    `<text x='340' y='505' font-family='monospace' font-size='10' font-weight='bold' fill='rgb(255,215,0)' text-anchor='middle'>D3SK</text>` +
+    `<rect x='28' y='28' width='4' height='4' fill='rgb(0,255,65)' opacity='0.3'/>` +
+    `<rect x='36' y='32' width='4' height='4' fill='rgb(0,229,255)' opacity='0.2'/>` +
+    `<rect x='364' y='28' width='4' height='4' fill='rgb(255,0,85)' opacity='0.3'/>` +
+    `<rect x='356' y='32' width='4' height='4' fill='rgb(255,215,0)' opacity='0.2'/>` +
+    `</svg>`
+}
+
 export default function FillOffer() {
   const { offerId } = useParams()
   const navigate = useNavigate()
@@ -25,8 +80,6 @@ export default function FillOffer() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [usdPrices, setUsdPrices] = useState({})
   const [feeRate, setFeeRate] = useState(null) // null = loading
-  const [nftSvg, setNftSvg] = useState(null)
-  const [svgLoading, setSvgLoading] = useState(false)
 
   useEffect(() => {
     if (offers.length > 0) {
@@ -46,59 +99,6 @@ export default function FillOffer() {
     }
     fetchPrices()
   }, [])
-
-  // Fetch on-chain SVG certificate from the NFT
-  useEffect(() => {
-    if (!offer) return
-    const makerAddr = offer.maker || offer.maker_address
-    if (!makerAddr) return
-
-    async function fetchNftSvg() {
-      setSvgLoading(true)
-      try {
-        const svg = await fcl.query({
-          cadence: `
-            import D3SKOfferNFT from ${config.d3skOfferNFT}
-
-            access(all) fun main(addr: Address, nftID: UInt64): String? {
-              let acct = getAccount(addr)
-              let cap = acct.capabilities.get<&{D3SKOfferNFT.OfferCollectionPublic}>(
-                D3SKOfferNFT.CollectionPublicPath
-              )
-              if !cap.check() { return nil }
-              let col = cap.borrow()!
-              let ids = col.getOfferIDs()
-              // Check if this NFT exists in the collection
-              var found = false
-              for id in ids {
-                if id == nftID { found = true; break }
-              }
-              if !found { return nil }
-              // Borrow the NFT and resolve the CertificateSVG view
-              let nftRef = col.borrowNFT(nftID)
-              if nftRef == nil { return nil }
-              let view = nftRef!.resolveView(Type<D3SKOfferNFT.CertificateSVG>())
-              if view == nil { return nil }
-              let cert = view! as! D3SKOfferNFT.CertificateSVG
-              return cert.svg
-            }
-          `,
-          args: (arg, t) => [
-            arg(makerAddr, t.Address),
-            arg(parseInt(offerId).toString(), t.UInt64),
-          ],
-        })
-        if (svg) {
-          setNftSvg(svg)
-        }
-      } catch (err) {
-        console.warn('Could not fetch NFT SVG:', err)
-      } finally {
-        setSvgLoading(false)
-      }
-    }
-    fetchNftSvg()
-  }, [offer, offerId])
 
   // Fetch protocol fee rate
   useEffect(() => {
@@ -217,6 +217,22 @@ export default function FillOffer() {
   const sellUsdPrice = usdPrices[sellTokenName] || 0
   const payUsdValue = (parseFloat(offer.ask_amount) * askUsdPrice).toFixed(2)
   const receiveUsdValue = (parseFloat(offer.sell_amount) * sellUsdPrice).toFixed(2)
+
+  // Generate the certificate SVG (matches the on-chain NFT exactly)
+  const certificateSvg = useMemo(() => {
+    if (!offer) return null
+    return generateCertificateSVG({
+      id: offer.id,
+      sellTokenName,
+      askTokenName,
+      sellAmount: offer.sell_amount,
+      askAmount: offer.ask_amount,
+      maker: makerAddr,
+      createdAt: offer.created_at,
+      expiresAt: offer.expires_at,
+      status: offer.status || 'active',
+    })
+  }, [offer, sellTokenName, askTokenName, makerAddr])
 
   return (
     <div className="min-h-screen bg-d3sk-bg px-4 py-8">
@@ -347,53 +363,7 @@ export default function FillOffer() {
           </div>
         </div>
 
-        {/* On-Chain SVG NFT Certificate */}
-        <div className="pixel-window border-3 border-d3sk-yellow shadow-pixel mb-6">
-          <div className="pixel-window-title bg-d3sk-yellow text-d3sk-bg">
-            <span className="text-pixel-sm font-pixel">FULLY ON-CHAIN SVG NFT</span>
-          </div>
-          <div className="pixel-window-body bg-d3sk-bg p-4">
-            {svgLoading ? (
-              <div className="text-center py-8">
-                <div className="w-8 h-8 border-2 border-d3sk-yellow border-t-d3sk-green rounded-full animate-spin mx-auto mb-3"></div>
-                <p className="font-retro text-retro-sm text-d3sk-muted">LOADING ON-CHAIN SVG...</p>
-              </div>
-            ) : nftSvg ? (
-              <div className="flex flex-col items-center">
-                <div
-                  className="w-full max-w-xs mx-auto border-2 border-d3sk-border shadow-pixel"
-                  dangerouslySetInnerHTML={{ __html: nftSvg }}
-                />
-                <p className="font-retro text-retro-sm text-d3sk-muted mt-3 text-center">
-                  100% ON-CHAIN — NO IPFS, NO ARWEAVE, NO OFF-CHAIN STORAGE
-                </p>
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <p className="font-retro text-retro-sm text-d3sk-muted">
-                  SVG CERTIFICATE UNAVAILABLE
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Zero-Custody Explanation */}
-        <div className="pixel-window border-2 border-d3sk-green shadow-pixel mb-6">
-          <div className="pixel-window-title bg-d3sk-green text-d3sk-bg">
-            <span className="text-pixel-sm font-pixel">ATOMIC SETTLEMENT</span>
-          </div>
-          <div className="pixel-window-body bg-d3sk-bg p-3">
-            <ul className="font-retro text-retro-sm text-d3sk-text space-y-1">
-              <li>• ONE TRANSACTION</li>
-              <li>• NO DEPOSITS REQUIRED</li>
-              <li>• NO INTERMEDIARY</li>
-              <li>• PEER-TO-PEER ON FLOW</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Action Area */}
+        {/* Action Area — placed above NFT preview for easy access */}
         <div className="pixel-window border-3 border-d3sk-accent shadow-pixel">
           <div className="pixel-window-title bg-d3sk-accent text-d3sk-bg">
             <span className="text-pixel-sm font-pixel">EXECUTE TRADE</span>
@@ -506,6 +476,41 @@ export default function FillOffer() {
                 )}
               </>
             )}
+          </div>
+        </div>
+
+        {/* On-Chain SVG NFT Certificate */}
+        {certificateSvg && (
+          <div className="pixel-window border-3 border-d3sk-yellow shadow-pixel mb-6">
+            <div className="pixel-window-title bg-d3sk-yellow text-d3sk-bg">
+              <span className="text-pixel-sm font-pixel">FULLY ON-CHAIN SVG NFT</span>
+            </div>
+            <div className="pixel-window-body bg-d3sk-bg p-4">
+              <div className="flex flex-col items-center">
+                <div
+                  className="w-full max-w-xs mx-auto border-2 border-d3sk-border shadow-pixel"
+                  dangerouslySetInnerHTML={{ __html: certificateSvg }}
+                />
+                <p className="font-retro text-retro-sm text-d3sk-muted mt-3 text-center">
+                  100% ON-CHAIN — NO IPFS, NO ARWEAVE, NO OFF-CHAIN STORAGE
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Zero-Custody Explanation */}
+        <div className="pixel-window border-2 border-d3sk-green shadow-pixel mb-6">
+          <div className="pixel-window-title bg-d3sk-green text-d3sk-bg">
+            <span className="text-pixel-sm font-pixel">ATOMIC SETTLEMENT</span>
+          </div>
+          <div className="pixel-window-body bg-d3sk-bg p-3">
+            <ul className="font-retro text-retro-sm text-d3sk-text space-y-1">
+              <li>• ONE TRANSACTION</li>
+              <li>• NO DEPOSITS REQUIRED</li>
+              <li>• NO INTERMEDIARY</li>
+              <li>• PEER-TO-PEER ON FLOW</li>
+            </ul>
           </div>
         </div>
       </div>
