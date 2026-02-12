@@ -12,8 +12,7 @@ const networkConfig = {
     nonFungibleToken: "0x631e88ae7f1d7c20",
     d3skOfferNFT: import.meta.env.VITE_D3SK_OFFER_ADDRESS || "0x_DEPLOY_ADDRESS",
     d3skRegistry: import.meta.env.VITE_D3SK_REGISTRY_ADDRESS || "0x_DEPLOY_ADDRESS",
-    scheduler: "0xe20612a0776ca4bf",
-    schedulerUtils: "0xe20612a0776ca4bf",
+    scheduler: "0xe467b9dd11fa00df",
   },
   mainnet: {
     accessNode: "https://rest-mainnet.onflow.org",
@@ -23,8 +22,7 @@ const networkConfig = {
     nonFungibleToken: "0x1d7e57aa55817448",
     d3skOfferNFT: import.meta.env.VITE_D3SK_OFFER_ADDRESS || "0x_DEPLOY_ADDRESS",
     d3skRegistry: import.meta.env.VITE_D3SK_REGISTRY_ADDRESS || "0x_DEPLOY_ADDRESS",
-    scheduler: "0xe20612a0776ca4bf",
-    schedulerUtils: "0xe20612a0776ca4bf",
+    scheduler: "0xe467b9dd11fa00df",
   }
 }
 
@@ -42,7 +40,6 @@ fcl.config({
   "0xD3SKOfferNFT": config.d3skOfferNFT,
   "0xD3SKRegistry": config.d3skRegistry,
   "0xSCHEDULER": config.scheduler,
-  "0xSCHEDULERUTILS": config.schedulerUtils,
 })
 
 export { fcl, config, FLOW_NETWORK }

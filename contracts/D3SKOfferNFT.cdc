@@ -9,7 +9,6 @@ import NonFungibleToken from "NonFungibleToken"
 import MetadataViews from "MetadataViews"
 import ViewResolver from "ViewResolver"
 import FlowTransactionScheduler from "FlowTransactionScheduler"
-import FlowTransactionSchedulerUtils from "FlowTransactionSchedulerUtils"
 import D3SKRegistry from "D3SKRegistry"
 
 access(all) contract D3SKOfferNFT: NonFungibleToken {
@@ -398,6 +397,10 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
         // Generates a fully on-chain 8-bit stock certificate SVG.
         // Uses rgb() colors (no # chars) for safe data URI embedding.
         // Number formatting via contract-level helpers (StreamVest pattern).
+        access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+            return <- D3SKOfferNFT.createEmptyCollection(nftType: Type<@D3SKOfferNFT.NFT>())
+        }
+
         access(all) view fun generateCertificateSVG(): String {
             let sellAmount = self.getSellAmount()
 
@@ -555,7 +558,7 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
     //  COLLECTION RESOURCE
     // ══════════════════════════════════════════════════════════════
     access(all) resource Collection: NonFungibleToken.Collection, OfferCollectionPublic {
-        access(contract) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
+        access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
 
         init() {
             self.ownedNFTs <- {}
@@ -721,7 +724,7 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
             self.receiverCapability = receiverCapability
         }
 
-        access(FlowTransactionScheduler.Execute) fun executeTransaction() {
+        access(FlowTransactionScheduler.Execute) fun executeTransaction(id: UInt64, data: AnyStruct?) {
             let collectionRef = self.collectionCapability.borrow()
             if collectionRef == nil { return }
 
