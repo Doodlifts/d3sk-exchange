@@ -61,8 +61,9 @@ export function useTransactions() {
                   }
 
                   // Ensure valid public capability (handles stale/missing/wrong-type caps)
-                  let existingCap = signer.capabilities.get<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionPublicPath)
-                  if existingCap == nil || !existingCap!.check() {
+                  // capabilities.get<T>() returns non-optional Capability<T> in Cadence 1.0
+                  // .check() returns false if no valid capability exists at the path
+                  if !signer.capabilities.get<auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection>(D3SKOfferNFT.CollectionPublicPath).check() {
                       signer.capabilities.unpublish(D3SKOfferNFT.CollectionPublicPath)
                       let cap = signer.capabilities.storage.issue<
                           auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection
