@@ -469,7 +469,7 @@ export default function CreateOffer() {
               </p>
               <button
                 type="button"
-                onClick={() => navigate('/orderbook')}
+                onClick={() => navigate('/')}
                 className="text-pixel-xs btn-secondary px-3 py-1 shadow-pixel"
               >
                 VIEW ORDERBOOK
