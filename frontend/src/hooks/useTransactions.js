@@ -39,8 +39,6 @@ export function useTransactions() {
           import D3SKOfferNFT from ${config.d3skOfferNFT}
 
           transaction(sellAmount: UFix64, askTokenTypeIdentifier: String, askAmount: UFix64, duration: UFix64) {
-              let offerNFT: @D3SKOfferNFT.NFT
-
               prepare(signer: auth(BorrowValue, SaveValue, LoadValue, IssueStorageCapabilityController, PublishCapability) &Account) {
                   // Calculate expiration
                   var expiresAt: UFix64? = nil
@@ -70,21 +68,19 @@ export function useTransactions() {
                       ?? panic("Invalid ask token type")
 
                   // Mint offer NFT (also registers with D3SKRegistry)
-                  self.offerNFT <- D3SKOfferNFT.mintOffer(
+                  let offerNFT <- D3SKOfferNFT.mintOffer(
                       sellVault: <-sellVault,
                       askTokenType: askType,
                       askAmount: askAmount,
                       makerAddress: signer.address,
                       expiresAt: expiresAt
                   )
-              }
 
-              execute {
                   // Deposit the NFT into signer's collection
-                  let collectionRef = self.account.storage.borrow<&D3SKOfferNFT.Collection>(
+                  let collectionRef = signer.storage.borrow<&D3SKOfferNFT.Collection>(
                       from: D3SKOfferNFT.CollectionStoragePath
                   ) ?? panic("Could not borrow collection")
-                  collectionRef.deposit(token: <-self.offerNFT)
+                  collectionRef.deposit(token: <-offerNFT)
               }
           }
         `
