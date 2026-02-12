@@ -46,17 +46,14 @@ export function useTransactions() {
                       expiresAt = getCurrentBlock().timestamp + duration
                   }
 
-                  // Setup NFT Collection if needed
+                  // Setup NFT Collection + public capability (first time only)
                   if signer.storage.borrow<&D3SKOfferNFT.Collection>(from: D3SKOfferNFT.CollectionStoragePath) == nil {
                       signer.storage.save(<- D3SKOfferNFT.createEmptyCollection(nftType: Type<@D3SKOfferNFT.NFT>()), to: D3SKOfferNFT.CollectionStoragePath)
+                      let cap = signer.capabilities.storage.issue<
+                          auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection
+                      >(D3SKOfferNFT.CollectionStoragePath)
+                      signer.capabilities.publish(cap, at: D3SKOfferNFT.CollectionPublicPath)
                   }
-
-                  // Ensure public capability is published (safe: unpublish stale, then publish fresh)
-                  signer.capabilities.unpublish(D3SKOfferNFT.CollectionPublicPath)
-                  let cap = signer.capabilities.storage.issue<
-                      auth(D3SKOfferNFT.Fill) &D3SKOfferNFT.Collection
-                  >(D3SKOfferNFT.CollectionStoragePath)
-                  signer.capabilities.publish(cap, at: D3SKOfferNFT.CollectionPublicPath)
 
                   // Withdraw sell tokens
                   let vaultRef = signer.storage.borrow<auth(FungibleToken.Withdraw) &${sellTokenConfig.vaultType}>(
