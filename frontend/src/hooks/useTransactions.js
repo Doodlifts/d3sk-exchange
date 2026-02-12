@@ -31,20 +31,31 @@ export function useTransactions() {
 
   // ── Create Offer (Mint NFT) ────────────────────────────────────
   const createOffer = useCallback(
-    async (sellAmount, askTokenTypeIdentifier, askAmount, sellTokenKey, duration = "0.0") => {
+    async (sellAmount, askTokenTypeIdentifier, askAmount, sellTokenKey, askTokenKey, duration = "0.0") => {
       resetTx()
       try {
         setTxStatus('pending')
 
         const sellTokenConfig = getTokenConfig(sellTokenKey, FLOW_NETWORK)
+        const askTokenConfig = getTokenConfig(askTokenKey, FLOW_NETWORK)
         if (!sellTokenConfig) {
           throw new Error(`Invalid sell token: ${sellTokenKey}`)
         }
+        if (!askTokenConfig) {
+          throw new Error(`Invalid ask token: ${askTokenKey}`)
+        }
+
+        // Build imports — avoid duplicates if sell and ask are same contract
+        const askImport = (askTokenConfig.contractName !== sellTokenConfig.contractName ||
+                           askTokenConfig.contractAddress !== sellTokenConfig.contractAddress)
+          ? `import ${askTokenConfig.contractName} from ${askTokenConfig.contractAddress}`
+          : ''
 
         const cadenceCode = `
           import FungibleToken from ${config.fungibleToken}
           import NonFungibleToken from ${config.nonFungibleToken}
           import ${sellTokenConfig.contractName} from ${sellTokenConfig.contractAddress}
+          ${askImport}
           import D3SKOfferNFT from ${config.d3skOfferNFT}
           import D3SKFillProxy from ${config.d3skOfferNFT}
 
@@ -71,6 +82,14 @@ export function useTransactions() {
                       signer.capabilities.unpublish(D3SKFillProxy.ProxyPublicPath)
                       let proxyCap = signer.capabilities.storage.issue<&D3SKFillProxy.Proxy>(D3SKFillProxy.ProxyStoragePath)
                       signer.capabilities.publish(proxyCap, at: D3SKFillProxy.ProxyPublicPath)
+                  }
+
+                  // Ensure maker has ask token vault (so taker can pay them on fill)
+                  if signer.storage.borrow<&{FungibleToken.Receiver}>(from: ${askTokenConfig.storagePath}) == nil {
+                      let emptyVault <- ${askTokenConfig.contractName}.createEmptyVault(vaultType: Type<@${askTokenConfig.vaultType}>())
+                      signer.storage.save(<-emptyVault, to: ${askTokenConfig.storagePath})
+                      let receiverCap = signer.capabilities.storage.issue<&{FungibleToken.Receiver}>(${askTokenConfig.storagePath})
+                      signer.capabilities.publish(receiverCap, at: ${askTokenConfig.receiverPath})
                   }
 
                   // Withdraw sell tokens
@@ -142,14 +161,29 @@ export function useTransactions() {
           throw new Error(`Invalid receive token: ${receiveTokenKey}`)
         }
 
+        // Build imports — avoid duplicates if payment and receive are same contract
+        const receiveImport = (receiveTokenConfig.contractName !== paymentTokenConfig.contractName ||
+                               receiveTokenConfig.contractAddress !== paymentTokenConfig.contractAddress)
+          ? `import ${receiveTokenConfig.contractName} from ${receiveTokenConfig.contractAddress}`
+          : ''
+
         const cadenceCode = `
           import FungibleToken from ${config.fungibleToken}
           import ${paymentTokenConfig.contractName} from ${paymentTokenConfig.contractAddress}
+          ${receiveImport}
           import D3SKOfferNFT from ${config.d3skOfferNFT}
           import D3SKFillProxy from ${config.d3skOfferNFT}
 
           transaction(holderAddress: Address, offerID: UInt64, paymentAmount: UFix64) {
-              prepare(signer: auth(BorrowValue) &Account) {
+              prepare(signer: auth(BorrowValue, SaveValue, IssueStorageCapabilityController, PublishCapability) &Account) {
+                  // Ensure taker has receive token vault (to receive the sell tokens)
+                  if signer.storage.borrow<&{FungibleToken.Receiver}>(from: ${receiveTokenConfig.storagePath}) == nil {
+                      let emptyVault <- ${receiveTokenConfig.contractName}.createEmptyVault(vaultType: Type<@${receiveTokenConfig.vaultType}>())
+                      signer.storage.save(<-emptyVault, to: ${receiveTokenConfig.storagePath})
+                      let receiverCap = signer.capabilities.storage.issue<&{FungibleToken.Receiver}>(${receiveTokenConfig.storagePath})
+                      signer.capabilities.publish(receiverCap, at: ${receiveTokenConfig.receiverPath})
+                  }
+
                   // Borrow the holder's FillProxy (non-auth — proxy wraps auth capability internally)
                   let proxyRef = getAccount(holderAddress)
                       .capabilities.borrow<&D3SKFillProxy.Proxy>(

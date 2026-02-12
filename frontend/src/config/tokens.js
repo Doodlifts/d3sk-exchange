@@ -17,10 +17,44 @@ export const TOKEN_REGISTRY = {
     coingeckoId: 'flow',
     decimals: 8,
   },
+  PYUSD: {
+    // PYUSD (PayPal USD) — EVM-bridged via VM Bridge on Flow Cadence
+    // https://developers.flow.com/defi/pyusd0-integration-guide
+    testnet: null,
+    mainnet: 'A.1e4aa0b87d10b141.EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750.Vault',
+    label: 'PYUSD',
+    contractName: 'EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750',
+    contractAddress: { testnet: null, mainnet: '0x1e4aa0b87d10b141' },
+    storagePath: '/storage/EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750Vault',
+    receiverPath: '/public/EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750Receiver',
+    vaultType: 'EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750.Vault',
+    icon: '₱',
+    coingeckoId: 'paypal-usd',
+    isStablecoin: true,
+    decimals: 8,
+    description: 'PayPal USD on Flow',
+  },
   USDC: {
+    // USDCFlow — native Circle USDC on Flow (post-Crescendo)
+    testnet: null,
+    mainnet: 'A.f1ab99c82dee3526.USDCFlow.Vault',
+    label: 'USDC',
+    contractName: 'USDCFlow',
+    contractAddress: { testnet: null, mainnet: '0xf1ab99c82dee3526' },
+    storagePath: '/storage/USDCFlowVault',
+    receiverPath: '/public/USDCFlowReceiver',
+    vaultType: 'USDCFlow.Vault',
+    icon: '$',
+    coingeckoId: 'usd-coin',
+    isStablecoin: true,
+    decimals: 8,
+    description: 'Native USDC on Flow (Circle)',
+  },
+  USDC_LEGACY: {
+    // Legacy FiatToken USDC (pre-Crescendo)
     testnet: 'A.a983fecbed621163.FiatToken.Vault',
     mainnet: 'A.b19436aae4d94622.FiatToken.Vault',
-    label: 'USDC',
+    label: 'USDC (Legacy)',
     contractName: 'FiatToken',
     contractAddress: { testnet: '0xa983fecbed621163', mainnet: '0xb19436aae4d94622' },
     storagePath: '/storage/USDCVault',
@@ -30,6 +64,8 @@ export const TOKEN_REGISTRY = {
     coingeckoId: 'usd-coin',
     isStablecoin: true,
     decimals: 8,
+    description: 'Legacy USDC (FiatToken)',
+    isDeprecated: true,
   },
   USDT: {
     testnet: null,
@@ -56,22 +92,6 @@ export const TOKEN_REGISTRY = {
     vaultType: 'stFlowToken.Vault',
     icon: '⚡',
     coingeckoId: null, // priced relative to FLOW
-    decimals: 8,
-  },
-  PYUSD: {
-    // PYUSD0 via LayerZero — EVM-bridged token on Flow Cadence
-    // https://developers.flow.com/defi/pyusd0-integration-guide
-    testnet: null,
-    mainnet: 'A.1e4aa0b87d10b141.EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750.Vault',
-    label: 'PYUSD',
-    contractName: 'EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750',
-    contractAddress: { testnet: null, mainnet: '0x1e4aa0b87d10b141' },
-    storagePath: '/storage/EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750Vault',
-    receiverPath: '/public/EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750Receiver',
-    vaultType: 'EVMVMBridgedToken_99af3eea856556646c98c8b9b2548fe815240750.Vault',
-    icon: '₱',
-    coingeckoId: 'paypal-usd',
-    isStablecoin: true,
     decimals: 8,
   },
   ceWETH: {
@@ -218,7 +238,8 @@ export function getTokenName(typeIdentifier) {
   // Common contract name to label mappings
   const nameMap = {
     FlowToken: 'FLOW',
-    FiatToken: 'USDC',
+    USDCFlow: 'USDC',
+    FiatToken: 'USDC (Legacy)',
     stFlowToken: 'stFLOW',
     TeleportedTetherToken: 'USDT',
     ceWETH: 'WETH',
@@ -319,9 +340,9 @@ export async function fetchAllTokenPrices() {
     // Return fallback prices
     return {
       FLOW: { usd: 0.75, change24h: 0 },
+      PYUSD: { usd: 1.0, change24h: 0 },
       USDC: { usd: 1.0, change24h: 0 },
       USDT: { usd: 1.0, change24h: 0 },
-      PYUSD: { usd: 1.0, change24h: 0 },
       stFLOW: { usd: 0.79, change24h: 0 },
       WETH: { usd: 3200, change24h: 0 },
       WBTC: { usd: 95000, change24h: 0 },

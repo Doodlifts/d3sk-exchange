@@ -5,6 +5,7 @@ import { useWallet } from '../hooks/useWallet'
 import { useTransactions } from '../hooks/useTransactions'
 import { FLOW_NETWORK } from '../config/fcl'
 import { TOKEN_REGISTRY, ALL_TOKEN_KEYS, getTokenTypeId, getAvailableTokenKeys, fetchAllTokenPrices } from '../config/tokens'
+import TokenSelect from './TokenSelect'
 import { FLOW_NETWORK as currentNetwork } from '../config/fcl'
 
 export default function CreateOffer() {
@@ -14,7 +15,7 @@ export default function CreateOffer() {
 
   const [sellToken, setSellToken] = useState('FLOW');
   const [sellAmount, setSellAmount] = useState('');
-  const [askToken, setAskToken] = useState('USDC');
+  const [askToken, setAskToken] = useState('PYUSD');
   const [askAmount, setAskAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [usdPrices, setUsdPrices] = useState({});
@@ -115,7 +116,7 @@ export default function CreateOffer() {
       const askTokenTypeId = getTokenTypeId(askToken, FLOW_NETWORK);
       const selectedExpiration = EXPIRATION_OPTIONS.find(o => o.value === expiration);
       const duration = selectedExpiration ? selectedExpiration.seconds : '0.0';
-      await createOffer(sellAmount, askTokenTypeId, askAmount, sellToken, duration);
+      await createOffer(sellAmount, askTokenTypeId, askAmount, sellToken, askToken, duration);
 
       // Show success toast
       toast.success('Offer created successfully!', {
@@ -210,18 +211,11 @@ export default function CreateOffer() {
               </label>
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <select
+                  <TokenSelect
                     value={sellToken}
-                    onChange={(e) => setSellToken(e.target.value)}
-                    className="input-field w-full bg-d3sk-surface text-d3sk-text border-2 border-d3sk-border text-pixel-xs"
-                    style={{ fontFamily: '"VT323"' }}
-                  >
-                    {availableTokenKeys.map((token) => (
-                      <option key={token} value={token}>
-                        {getTokenDisplay(token)}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setSellToken}
+                    excludeToken={askToken}
+                  />
                 </div>
                 <div className="flex-1">
                   <input
@@ -269,18 +263,11 @@ export default function CreateOffer() {
               </label>
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <select
+                  <TokenSelect
                     value={askToken}
-                    onChange={(e) => setAskToken(e.target.value)}
-                    className="input-field w-full bg-d3sk-surface text-d3sk-text border-2 border-d3sk-border text-pixel-xs"
-                    style={{ fontFamily: '"VT323"' }}
-                  >
-                    {availableTokenKeys.map((token) => (
-                      <option key={token} value={token}>
-                        {getTokenDisplay(token)}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setAskToken}
+                    excludeToken={sellToken}
+                  />
                 </div>
                 <div className="flex-1">
                   <input
