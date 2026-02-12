@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import Ticker from './components/Ticker'
 import Navbar from './components/Navbar'
 import OrderBook from './components/OrderBook'
 import CreateOffer from './components/CreateOffer'
@@ -29,9 +30,10 @@ export default function App() {
         }}
       />
 
+      <Ticker />
       <Navbar />
 
-      <main className="relative z-10 pt-20 pb-12 px-4">
+      <main className="relative z-10 pt-[112px] pb-12 px-4">
         <div className="max-w-7xl mx-auto">
           <Routes>
             <Route path="/" element={<OrderBook />} />
