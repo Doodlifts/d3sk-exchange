@@ -242,7 +242,12 @@ export function useTransactions() {
         setTxStatus('sealed')
       } catch (err) {
         console.error('Error filling offer:', err)
-        setError(err.message)
+        let errorMessage = err.message
+        // Check for treasury receiver configuration errors
+        if (errorMessage && errorMessage.includes('Could not borrow treasury')) {
+          errorMessage = 'The D3SK treasury is not set up to collect fees in this token. Please contact the team or try a different trading pair.'
+        }
+        setError(errorMessage)
         setTxStatus('error')
       }
     },
