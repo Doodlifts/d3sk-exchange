@@ -560,7 +560,8 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
             payment: @{FungibleToken.Vault},
             holderAddress: Address,
             takerAddress: Address,
-            askReceiverPath: PublicPath
+            askReceiverPath: PublicPath,
+            askStoragePath: StoragePath
         ): @{FungibleToken.Vault}
     }
 

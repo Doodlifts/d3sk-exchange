@@ -1,71 +1,73 @@
 {
-  "networks": {
-    "emulator": "127.0.0.1:3569",
-    "testnet": "access.devnet.nodes.onflow.org:9000",
-    "mainnet": "access.mainnet.nodes.onflow.org:9000"
-  },
-  "accounts": {
-    "mainnet-deployer": {
-      "address": "0x5ec90e3dcf0067c4",
-      "key": {
-        "type": "file",
-        "location": "./mainnet-deployer.pkey",
-        "signatureAlgorithm": "ECDSA_P256",
-        "hashAlgorithm": "SHA3_256",
-        "index": 16
-      }
-    }
-  },
-  "contracts": {
-    "D3SKOfferNFT": {
-      "source": "./contracts/D3SKOfferNFT.cdc"
-    },
-    "D3SKRegistry": {
-      "source": "./contracts/D3SKRegistry.cdc"
-    },
-    "D3SKFillProxy": {
-      "source": "./contracts/D3SKFillProxy.cdc"
-    },
-    "FungibleToken": {
-      "aliases": {
-        "testnet": "0x9a0766d93b6608b7",
-        "mainnet": "0xf233dcee88fe0abe"
-      }
-    },
-    "FlowToken": {
-      "aliases": {
-        "testnet": "0x7e60df042a9c0868",
-        "mainnet": "0x1654653399040a61"
-      }
-    },
-    "NonFungibleToken": {
-      "aliases": {
-        "testnet": "0x631e88ae7f1d7c20",
-        "mainnet": "0x1d7e57aa55817448"
-      }
-    },
-    "MetadataViews": {
-      "aliases": {
-        "testnet": "0x631e88ae7f1d7c20",
-        "mainnet": "0x1d7e57aa55817448"
-      }
-    },
-    "ViewResolver": {
-      "aliases": {
-        "testnet": "0x631e88ae7f1d7c20",
-        "mainnet": "0x1d7e57aa55817448"
-      }
-    },
-    "FlowTransactionScheduler": {
-      "aliases": {
-        "testnet": "0xe467b9dd11fa00df",
-        "mainnet": "0xe467b9dd11fa00df"
-      }
-    }
-  },
-  "deployments": {
-    "mainnet": {
-      "mainnet-deployer": ["D3SKFillProxy"]
-    }
-  }
+	"contracts": {
+		"D3SKFillProxy": "./contracts/D3SKFillProxy.cdc",
+		"D3SKOfferNFT": "./contracts/D3SKOfferNFT.cdc",
+		"D3SKRegistry": "./contracts/D3SKRegistry.cdc",
+		"FlowToken": {
+			"source": "",
+			"aliases": {
+				"mainnet": "1654653399040a61",
+				"testnet": "7e60df042a9c0868"
+			}
+		},
+		"FlowTransactionScheduler": {
+			"source": "",
+			"aliases": {
+				"mainnet": "e467b9dd11fa00df",
+				"testnet": "e467b9dd11fa00df"
+			}
+		},
+		"FungibleToken": {
+			"source": "",
+			"aliases": {
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7"
+			}
+		},
+		"MetadataViews": {
+			"source": "",
+			"aliases": {
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20"
+			}
+		},
+		"NonFungibleToken": {
+			"source": "",
+			"aliases": {
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20"
+			}
+		},
+		"ViewResolver": {
+			"source": "",
+			"aliases": {
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20"
+			}
+		}
+	},
+	"networks": {
+		"emulator": "127.0.0.1:3569",
+		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"testnet": "access.devnet.nodes.onflow.org:9000"
+	},
+	"accounts": {
+		"mainnet-deployer": {
+			"address": "5ec90e3dcf0067c4",
+			"key": {
+				"type": "file",
+				"index": 16,
+				"location": "./mainnet-deployer.pkey"
+			}
+		}
+	},
+	"deployments": {
+		"mainnet": {
+			"mainnet-deployer": [
+				"D3SKRegistry",
+				"D3SKOfferNFT",
+				"D3SKFillProxy"
+			]
+		}
+	}
 }
