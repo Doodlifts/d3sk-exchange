@@ -207,13 +207,16 @@ export function useTransactions() {
                   let payment <- paymentVaultRef.withdraw(amount: totalPayment)
 
                   // Fill via proxy — payment goes to holderAddress, sell tokens returned to taker
+                  // Treasury vault for this token auto-initializes on first fill if needed
                   let askReceiverPath = ${paymentTokenConfig.receiverPath}
+                  let askStoragePath = ${paymentTokenConfig.storagePath}
                   let receivedTokens <- proxyRef.fillOffer(
                       id: offerID,
                       payment: <-payment,
                       holderAddress: holderAddress,
                       takerAddress: signer.address,
-                      askReceiverPath: askReceiverPath
+                      askReceiverPath: askReceiverPath,
+                      askStoragePath: askStoragePath
                   )
 
                   // Deposit received sell tokens into taker's vault
@@ -242,12 +245,7 @@ export function useTransactions() {
         setTxStatus('sealed')
       } catch (err) {
         console.error('Error filling offer:', err)
-        let errorMessage = err.message
-        // Check for treasury receiver configuration errors
-        if (errorMessage && errorMessage.includes('Could not borrow treasury')) {
-          errorMessage = 'The D3SK treasury is not set up to collect fees in this token. Please contact the team or try a different trading pair.'
-        }
-        setError(errorMessage)
+        setError(err.message)
         setTxStatus('error')
       }
     },

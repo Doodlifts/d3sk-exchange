@@ -5,7 +5,7 @@ import { fcl, config } from '../config/fcl'
 import { useWallet } from '../hooks/useWallet'
 import { useOffers } from '../hooks/useOffers'
 import { useTransactions } from '../hooks/useTransactions'
-import { getTokenName, getTokenKeyFromType, getTokenConfig, TOKEN_REGISTRY, fetchAllTokenPrices } from '../config/tokens'
+import { getTokenName, getTokenKeyFromType, TOKEN_REGISTRY, fetchAllTokenPrices } from '../config/tokens'
 import { FLOW_NETWORK } from '../config/fcl'
 
 function truncateAddress(addr) {
@@ -80,7 +80,6 @@ export default function FillOffer() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [usdPrices, setUsdPrices] = useState({})
   const [feeRate, setFeeRate] = useState(null) // null = loading
-  const [treasuryReady, setTreasuryReady] = useState(null) // null = checking, true/false = result
 
   // Scroll to top on mount
   useEffect(() => {
@@ -126,49 +125,6 @@ export default function FillOffer() {
     }
     fetchFeeRate();
   }, []);
-
-  // Check if treasury can receive the ask token (fee collection)
-  useEffect(() => {
-    async function checkTreasuryReadiness() {
-      if (!offer) return;
-
-      try {
-        setTreasuryReady(null); // start checking
-        const askType = offer.ask_type || offer.ask_token_type;
-        const askTokenKey = getTokenKeyFromType(askType);
-        const paymentTokenConfig = getTokenConfig(askTokenKey, FLOW_NETWORK);
-
-        if (!paymentTokenConfig) {
-          console.warn('Could not get token config for ask token');
-          setTreasuryReady(false);
-          return;
-        }
-
-        // Build Cadence script to check if treasury has receiver capability
-        const checkScript = `
-          import FungibleToken from ${config.fungibleToken}
-
-          access(all) fun main(addr: Address): Bool {
-            let acct = getAccount(addr)
-            let ref = acct.capabilities.borrow<&{FungibleToken.Receiver}>(${paymentTokenConfig.receiverPath})
-            return ref != nil
-          }
-        `;
-
-        const result = await fcl.query({
-          cadence: checkScript,
-          args: (arg, t) => [arg('0x5ec90e3dcf0067c4', t.Address)],
-        });
-
-        setTreasuryReady(result === true);
-      } catch (err) {
-        console.error('Error checking treasury readiness:', err);
-        setTreasuryReady(false);
-      }
-    }
-
-    checkTreasuryReadiness();
-  }, [offer]);
 
   useEffect(() => {
     if (txStatus === 'sealed') {
@@ -433,17 +389,9 @@ export default function FillOffer() {
                   </div>
                 )}
 
-                {treasuryReady === false && (
-                  <div className="bg-d3sk-red/20 border-2 border-d3sk-red p-3 mb-4">
-                    <p className="text-pixel-sm text-d3sk-red font-pixel">
-                      ⚠ The D3SK treasury is not configured to collect fees in {askTokenName}. This trade will fail. Please contact the D3SK team.
-                    </p>
-                  </div>
-                )}
-
                 <button
                   onClick={() => setShowConfirm(true)}
-                  disabled={isProcessing || feeRate === null || (offer.expires_at && Date.now() / 1000 > offer.expires_at) || treasuryReady === false}
+                  disabled={isProcessing || feeRate === null || (offer.expires_at && Date.now() / 1000 > offer.expires_at)}
                   className="w-full btn-primary px-6 py-3 font-pixel text-pixel-sm shadow-pixel transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing ? 'EXECUTING...' : 'FILL THIS OFFER'}

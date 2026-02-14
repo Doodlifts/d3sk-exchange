@@ -28,6 +28,12 @@ Thumbs.db
 # Vite temp files
 *.timestamp-*
 
+# Video/promo build artifacts (render locally, don't push)
+promo/node_modules/
+video/node_modules/
+video/*.mp4
+frontend/public/d3sk-trailer.mp4
+
 # Logs
 *.log
 npm-debug.log*

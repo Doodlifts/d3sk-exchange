@@ -21,7 +21,8 @@ access(all) contract D3SKFillProxy {
             payment: @{FungibleToken.Vault},
             holderAddress: Address,
             takerAddress: Address,
-            askReceiverPath: PublicPath
+            askReceiverPath: PublicPath,
+            askStoragePath: StoragePath
         ): @{FungibleToken.Vault} {
             let collectionRef = self.cap.borrow()
                 ?? panic("Cannot borrow collection from stored capability")
@@ -31,7 +32,8 @@ access(all) contract D3SKFillProxy {
                 payment: <-payment,
                 holderAddress: holderAddress,
                 takerAddress: takerAddress,
-                askReceiverPath: askReceiverPath
+                askReceiverPath: askReceiverPath,
+                askStoragePath: askStoragePath
             )
         }
 

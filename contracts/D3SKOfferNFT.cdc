@@ -212,7 +212,8 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
             payment: @{FungibleToken.Vault},
             holderAddress: Address,
             takerAddress: Address,
-            askReceiverPath: PublicPath
+            askReceiverPath: PublicPath,
+            askStoragePath: StoragePath
         ): @{FungibleToken.Vault} {
             pre {
                 self.status == 0: "Offer is not active"
@@ -239,13 +240,22 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
             ) ?? panic("Could not borrow holder's receiver for ask token")
             receiverRef.deposit(from: <-holderPayment)
 
-            // ── Fee to treasury ──
+            // ── Fee to treasury (auto-initializes vault if needed) ──
             let actualFee = payment.balance
             if actualFee > 0.0 {
-                let treasuryAccount = getAccount(D3SKOfferNFT.treasuryAddress)
-                let treasuryReceiver = treasuryAccount.capabilities.borrow<&{FungibleToken.Receiver}>(
-                    askReceiverPath
-                ) ?? panic("Could not borrow treasury receiver")
+                // Auto-initialize treasury vault for this token if it doesn't exist yet.
+                // This works because the contract lives on the treasury account and has
+                // self.account access to its own storage.
+                if D3SKOfferNFT.account.storage.borrow<&{FungibleToken.Receiver}>(from: askStoragePath) == nil {
+                    let emptyVault <- payment.createEmptyVault()
+                    D3SKOfferNFT.account.storage.save(<-emptyVault, to: askStoragePath)
+                    let cap = D3SKOfferNFT.account.capabilities.storage.issue<&{FungibleToken.Receiver}>(askStoragePath)
+                    D3SKOfferNFT.account.capabilities.publish(cap, at: askReceiverPath)
+                }
+
+                let treasuryReceiver = getAccount(D3SKOfferNFT.treasuryAddress)
+                    .capabilities.borrow<&{FungibleToken.Receiver}>(askReceiverPath)
+                    ?? panic("Could not borrow treasury receiver")
 
                 emit FeeCollected(offerId: self.id, tokenType: self.askTokenType.identifier, amount: actualFee)
                 treasuryReceiver.deposit(from: <-payment)
@@ -632,7 +642,8 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
             payment: @{FungibleToken.Vault},
             holderAddress: Address,
             takerAddress: Address,
-            askReceiverPath: PublicPath
+            askReceiverPath: PublicPath,
+            askStoragePath: StoragePath
         ): @{FungibleToken.Vault} {
             // Remove NFT to get ownership (needed to call contract-internal methods)
             let nft <- self.ownedNFTs.remove(key: id)
@@ -647,7 +658,8 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
                 payment: <-payment,
                 holderAddress: offerNFT.maker,
                 takerAddress: takerAddress,
-                askReceiverPath: askReceiverPath
+                askReceiverPath: askReceiverPath,
+                askStoragePath: askStoragePath
             )
 
             // Put NFT back (now status=filled, sellVault=nil, acts as receipt)
@@ -665,14 +677,16 @@ access(all) contract D3SKOfferNFT: NonFungibleToken {
             payment: @{FungibleToken.Vault},
             holderAddress: Address,
             takerAddress: Address,
-            askReceiverPath: PublicPath
+            askReceiverPath: PublicPath,
+            askStoragePath: StoragePath
         ): @{FungibleToken.Vault} {
             return <-self.fillOffer(
                 id: id,
                 payment: <-payment,
                 holderAddress: holderAddress,
                 takerAddress: takerAddress,
-                askReceiverPath: askReceiverPath
+                askReceiverPath: askReceiverPath,
+                askStoragePath: askStoragePath
             )
         }
 
